@@ -1,0 +1,170 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #e0e0e0;
+    color: #333;
+  }
+  
+  header {
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+    border-radius: 12px;
+    margin: 10px;
+  }
+  
+  header h1 {
+    font-size: 1.8em;
+    font-weight: bold;
+  }
+  .logo a {
+    text-decoration: none;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: 'Arial', sans-serif;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    align-items: center;
+    gap: 10px; /* Add space between icon and text */
+  }
+
+  .logo {
+    font-size: 1.5rem; /* Slightly smaller size */
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 2px; /* Add some spacing between letters */
+    font-family: 'Arial', sans-serif;
+    text-transform: uppercase;
+  }
+  
+  .logo .highlight {
+    color: #ff7f50; /* Accent color for "LA" */
+    font-weight: bold;
+    letter-spacing: 1px; /* Slightly tighter spacing for "LA" */
+  }
+  .toolbar {
+    display: flex;
+    gap: 5px; /* Reduce gap between buttons */
+  justify-content: flex-end; /* Align to the right */
+  flex-wrap: nowrap; /* Ensure items stay in one line */
+  width: 100%;
+  }
+  
+  .toolbar input,
+  .toolbar button {
+    padding: 8px 10px; /* Reduce padding for smaller size */
+    font-size: 0.9em; /* Adjust font size for mobile */  
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    background: #e0e0e0;
+    box-shadow: 4px 4px 8px #b8b8b8, -4px -4px 8px #ffffff;
+    transition: 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .toolbar input:focus,
+  .toolbar button:hover {
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+  }
+  .toolbar input {
+    max-width: 50px; /* Ensure input doesn't stretch */
+    text-align: center;
+  }
+  
+  .toolbar button {
+    flex: 1 1 auto; /* Allow buttons to shrink */
+  }
+  .toolbar button.active {
+    background: #d1d1d1;
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+    color: #007bff;
+  }
+  
+  main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  #canvas {
+    display: grid;
+    grid-template-columns: repeat(40, 20px);
+    grid-template-rows: repeat(20, 20px);
+    gap: 2px;
+    padding: 20px;
+    background: #e0e0e0;
+    border-radius: 12px;
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+  }
+  
+  .cell {
+    width: 20px;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    text-align: center;
+    line-height: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 4px 4px 8px #b8b8b8, -4px -4px 8px #ffffff;
+    transition: 0.3s ease;
+  }
+  
+  .cell:hover {
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+  }
+  
+  footer {
+    background: #e0e0e0;
+    text-align: center;
+    padding: 20px;
+    box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
+    border-radius: 12px;
+    margin: 10px;
+  }
+  
+  footer p {
+    font-size: 0.9em;
+  }
+  /* Responsive Design */
+@media (max-width: 768px) {
+    header {
+        flex-wrap: nowrap; /* Prevent header elements from wrapping */
+        flex-direction: column;
+        align-items: center; /* Center align on mobile */
+    }
+  
+    header h1 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+  
+    .toolbar {
+        justify-content: space-between; /* Distribute buttons evenly */
+        gap: 5px;
+    }
+  
+    .toolbar input,
+  .toolbar button {
+    flex: 1 1 20%; /* Ensure all items take up equal width */
+    max-width: 25%; /* Cap the width to ensure it fits in one line */
+  }
+  header h1 {
+    margin-bottom: 10px;
+  }
+  }

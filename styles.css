@@ -275,7 +275,17 @@ body {
   border-radius: 10px;
   margin-bottom: 10px;
 }
-
+.project-card a {
+  text-decoration: none;
+    color: #333;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: 'Arial', sans-serif;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    align-items: center;
+    gap: 10px; /* Add space between icon and text */
+}
 .project-card:hover {
   transform: translateY(-5px);
   box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
