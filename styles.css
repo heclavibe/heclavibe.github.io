@@ -16,6 +16,7 @@ body {
   gap: 30px; /* Space between menu items */
   padding: 0;
   margin: 20px 0;
+  text-align: center;
 }
 
 .nav-links a {
@@ -265,7 +266,7 @@ body {
   text-align: center;
   box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
   flex: 1 1 calc(30% - 20px);
-  max-width: calc(30% - 20px);
+  max-width: calc(40% - 20px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -277,7 +278,7 @@ body {
 }
 .project-card a {
   text-decoration: none;
-    color: #333;
+    color: #f66d6d;
     font-size: 1.2rem;
     font-weight: 600;
     font-family: 'Arial', sans-serif;

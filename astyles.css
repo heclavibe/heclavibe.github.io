@@ -102,7 +102,7 @@
   
   #canvas {
     display: grid;
-    grid-template-columns: repeat(40, 10px);
+    grid-template-columns: repeat(40, 12px);
     grid-template-rows: repeat(20, 20px);
     gap: 1px;
     padding: 20px;
@@ -110,15 +110,15 @@
     border-radius: 12px;
     box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
   }
-  
   .cell {
-    width: 10px;
+    width: 12px;
     height: 20px;
     background: #e0e0e0;
-    border-radius: 4px;
+    border-radius: 1px;
     text-align: center;
     line-height: 20px;
-    font-size: 16px;
+    font-size: 20px;
+    font-family: monospace; /* Use a monospace font for ASCII art */
     cursor: pointer;
     user-select: none;
     box-shadow: 2px 2px 4px #b8b8b8, -2px -2px 4px #ffffff;
