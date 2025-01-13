@@ -9,7 +9,7 @@ let selectedChar = charPicker.value;
 
 // Create grid
 function createCanvas() {
-  for (let i = 0; i < 800; i++) {
+  for (let i = 0; i < 2400; i++) {
     const cell = document.createElement('div');
     cell.className = 'cell';
     cell.addEventListener('mousedown', draw);
@@ -49,8 +49,8 @@ charPicker.addEventListener('input', (e) => {
 exportButton.addEventListener('click', () => {
   const rows = [];
   const cells = Array.from(canvas.children);
-  for (let i = 0; i < cells.length; i += 40) {
-    const row = cells.slice(i, i + 40).map(cell => cell.textContent || ' ').join('');
+  for (let i = 0; i < cells.length; i += 60) {
+    const row = cells.slice(i, i + 60).map(cell => cell.textContent || ' ').join('');
     rows.push(row);
   }
   const asciiArt = rows.join('\n');
