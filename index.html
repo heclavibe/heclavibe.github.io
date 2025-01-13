@@ -9,16 +9,33 @@
 <body>
   <header class="header">
     <div class="header-container">
-      <h1 class="logo">HecLAvibe</h1>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#about" aria-label="Go to About Section">About</a></li>
-          <li><a href="#projects" aria-label="Go to Projects Section">Projects</a></li>
-          <li><a href="#contact" aria-label="Go to Contact Section">Contact</a></li>
-        </ul>
-      </nav>
+      <h1 class="logo">Hec<span class="highlight">LA</span>vibe</h1>
     </div>
   </header>
+  
+  <nav class="mobile-nav">
+    <ul class="nav-links">
+      <li>
+        <a href="#about" aria-label="Go to About Section">
+          <span class="icon">🏠</span>
+        </a>
+        <span class="text">About</span>
+      </li>
+      <li>
+        <a href="#projects" aria-label="Go to Projects Section">
+          <span class="icon">💻</span>
+        </a>
+        <span class="text">Projects</span>
+      </li>
+      <li>
+        <a href="#contact" aria-label="Go to Contact Section">
+          <span class="icon">📞</span>
+        </a>
+        <span class="text">Contact</span>
+      </li>
+    </ul>
+  </nav>
+  
 
   <main>
     <section id="hero" class="hero-section">
@@ -43,14 +60,24 @@
       <div class="project-gallery">
         <div class="project-card">
           <img src="project1.png" alt="Interactive Poster Project">
-          <h3>Interactive Poster</h3>
-          <p>A dynamic poster design that responds to user interaction.</p>
+          <h3>AFI Film Festival 2022</h3>
+          <p>Branding strategies and implementation for a major Los Angeles Film Festival.</p>
         </div>
         <div class="project-card">
           <img src="project2.png" alt="3D Typography Project">
-          <h3>3D Typography</h3>
-          <p>Exploring three-dimensional letterforms using creative coding.</p>
+          <h3>Stoner Skatepark Logo</h3>
+          <p>Independently created the anniversary logo now being used by the park.</p>
         </div>
+        <div class="project-card">
+          <img src="project3.png" alt="Custom Design Tools Project">
+          <h3>Alverado Font</h3>
+          <p>Custom-built open source typefaces based on a street in Los Angeles</p>
+        </div>
+       <div class="project-card">
+          <img src="project4.png" alt="Custom Design Tools Project">
+          <h3>IEEE Publishing</h3>
+          <p>Design and layout of two program guides for the CVPR 2024 conference </p>
+        </div><!-- 
         <div class="project-card">
           <img src="project3.png" alt="Custom Design Tools Project">
           <h3>Design Tools</h3>
@@ -60,40 +87,107 @@
           <img src="project3.png" alt="Custom Design Tools Project">
           <h3>Design Tools</h3>
           <p>Custom-built tools to enhance the creative design process.</p>
-        </div>
-        <div class="project-card">
-          <img src="project3.png" alt="Custom Design Tools Project">
-          <h3>Design Tools</h3>
-          <p>Custom-built tools to enhance the creative design process.</p>
-        </div>
-        <div class="project-card">
-          <img src="project3.png" alt="Custom Design Tools Project">
-          <h3>Design Tools</h3>
-          <p>Custom-built tools to enhance the creative design process.</p>
-        </div>
+        </div>-->
       </div>
     </section>
 
+    <section id="education" class="main-container">
+      <h2>Education</h2>
+      
+      <!-- Teaching Philosophy -->
+      <div class="teaching-philosophy">
+        <h3>Teaching Philosophy</h3>
+        <p>
+          I believe in empowering students by fostering creativity, critical thinking, and hands-on exploration.
+          My teaching approach integrates design principles with cutting-edge technology, encouraging students
+          to develop meaningful, impactful work.
+        </p>
+      </div>
+      
+      <!-- Student Work Gallery -->
+      <div class="student-work">
+        <h3>Examples of Student Work</h3>
+        <div class="student-gallery">
+          <div class="student-card">
+            <img src="student1.jpg" alt="Student Project 1">
+            <p>Conceptual 3D packaging</p>
+          </div>
+          <div class="student-card">
+            <img src="student2.gif" alt="Student Project 2">
+            <p>Interactive Typography</p>
+          </div>
+          <div class="student-card">
+            <img src="student3.png" alt="Student Project 3">
+            <p>Adobe Illustrator Practice</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section id="photography" class="main-container">
+      <h2>Photography</h2>
+      <p>
+        Explore a selection of my photography work, showcasing my perspective and creative vision.
+      </p>
+      <div class="photo-gallery">
+        <div class="photo-card">
+          <img src="photo1.jpg" alt="Photography Image 1">
+        </div>
+        <div class="photo-card">
+          <img src="photo2.gif" alt="Photography Image 2">
+        </div>
+        <div class="photo-card">
+          <img src="photo3.jpg" alt="Photography Image 3">
+        </div>
+        <div class="photo-card">
+          <img src="photo4.jpg" alt="Photography Image 4">
+        </div>
+        <div class="photo-card">
+          <img src="photo5.jpg" alt="Photography Image 5">
+        </div>
+      </div>
+    </section>
+    
     <section id="contact" class="main-container">
       <h2>Contact</h2>
-      <form>
-        <label for="name">Your Name</label>
-        <input type="text" id="name" placeholder="Your Name" required>
-
-        <label for="email">Your Email</label>
-        <input type="email" id="email" placeholder="Your Email" required>
-
-        <label for="message">Your Message</label>
-        <textarea id="message" rows="4" placeholder="Your Message" required></textarea>
-
-        <button type="submit" class="submit-button" aria-label="Send your message">Send Message</button>
-      </form>
+      <ul class="contact-details">
+        <li>
+          <a href="mailto:hector@heclavibe.com" aria-label="Email Hector">
+            <span class="icon">📧</span>
+            <span class="text">hector@heclavibe.com</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://instagram.com/heclavibe" target="_blank" rel="noopener" aria-label="Visit Instagram @heclavibe">
+            <span class="icon">📸</span>
+            <span class="text">@heclavibe</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://linkedin.com/in/heclavibe" target="_blank" rel="noopener" aria-label="Visit LinkedIn @heclavibe">
+            <span class="icon">🔗</span>
+            <span class="text">@heclavibe</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://youtube.com/@heclavibe" target="_blank" rel="noopener" aria-label="Visit YouTube @heclavibe">
+            <span class="icon">🎥</span>
+            <span class="text">@heclavibe</span>
+          </a>
+        </li>
+      </ul>
+    
+      <!-- Footer Info -->
+      <div class="footer-info">
+        <p>&copy; 2025 Hector Torres. All rights reserved.</p>
+      </div>
     </section>
+    
+    
+    
+    
+    
   </main>
-
-  <footer>
-    <p>&copy; 2025 Your Name. All rights reserved.</p>
-  </footer>
   <script src="script.js"></script>
 </body>
 </html>

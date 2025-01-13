@@ -72,3 +72,27 @@ function animate() {
 // Initialize
 initParticles();
 animate();
+
+// Select all menu links
+const navLinks = document.querySelectorAll('.nav-links a');
+
+// Add the animation class with a delay for each link
+window.addEventListener('load', () => {
+  navLinks.forEach((link, index) => {
+    setTimeout(() => {
+      link.classList.add('animate');
+    }, index * 200); // Add delay for each link
+  });
+});
+
+// Select all text elements inside the menu
+const menuText = document.querySelectorAll('.nav-links .text');
+
+// Add the animation class with a delay for each text span
+window.addEventListener('load', () => {
+  menuText.forEach((text, index) => {
+    setTimeout(() => {
+      text.classList.add('animate');
+    }, index * 200); // Add delay for each menu item
+  });
+});
