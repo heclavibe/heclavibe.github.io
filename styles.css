@@ -1,3 +1,25 @@
+
+
+#ascii-art {
+  position: absolute;
+  font-family: monospace;
+  white-space: nowrap;
+  animation: scroll 10s linear infinite;
+  background-color: none;
+  color: limegreen;
+  white-space: pre;
+  overflow: hidden;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
 /* Global Styles */
 body {
   margin: 0;
@@ -5,7 +27,6 @@ body {
   background: #e0e0e0;
   color: #333;
 }
-
 
 /* Desktop Menu Styling */
 .nav-links {
@@ -193,7 +214,7 @@ body {
 
 /* Hero Section */
 .hero-section {
-  position: relative;
+  position: static;
   text-align: center;
   padding: 100px 20px;
   overflow: hidden; /* Ensure the canvas doesn't exceed the section */
