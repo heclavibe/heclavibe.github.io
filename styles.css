@@ -27,7 +27,9 @@ body {
   background: #e0e0e0;
   color: #333;
 }
-
+html, body {
+  overflow-x: hidden;
+}
 /* Desktop Menu Styling */
 .nav-links {
   list-style: none;

@@ -60,6 +60,7 @@ function drawParticles() {
 window.addEventListener("resize", () => {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
+  canvas.width = window.innerWidth;
   initParticles();
 });
 
