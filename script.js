@@ -17,6 +17,7 @@ function initParticles() {
       dx: (Math.random() - 0.5) * 2,
       dy: (Math.random() - 0.5) * 2,
       color: `rgba(255, 255, 255, ${Math.random() * 0.5 + 0.3})`, // Subtle glow
+      stopped: false, // New property to track if the particle is stopped
     });
   }
 }
@@ -35,32 +36,36 @@ function drawParticles() {
     ctx.fill();
     ctx.closePath();
 
-    // Update position
-    p.x += p.dx;
-    p.y += p.dy;
+    // Update position only if the particle isn't stopped
+    if (!p.stopped) {
+      p.x += p.dx;
+      p.y += p.dy;
 
-    // Bounce off edges
-    if (p.x - p.radius < 0 || p.x + p.radius > canvas.width) p.dx *= -1;
-    if (p.y - p.radius < 0 || p.y + p.radius > canvas.height) p.dy *= -1;
+      // Bounce off edges
+      if (p.x - p.radius < 0 || p.x + p.radius > canvas.width) p.dx *= -1;
+      if (p.y - p.radius < 0 || p.y + p.radius > canvas.height) p.dy *= -1;
+    }
   });
-
-  // Apply fade-out effect with a blur at the bottom
-  ctx.save(); // Save current context
-  ctx.filter = "blur(15px)"; // Apply blur filter
-  const gradient = ctx.createLinearGradient(0, canvas.height - 150, 0, canvas.height);
-  gradient.addColorStop(0, "rgba(224, 224, 224, 0.8)");
-  gradient.addColorStop(1, "rgba(224, 224, 224, 0)");
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
-  ctx.restore(); // Restore context to avoid blurring other elements
 }
+
+// Check if a particle is touched
+canvas.addEventListener("click", (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  particles.forEach((p) => {
+    const distance = Math.sqrt((clickX - p.x) ** 2 + (clickY - p.y) ** 2);
+    if (distance < p.radius) {
+      p.stopped = !p.stopped; // Toggle the stopped state
+    }
+  });
+});
 
 // Resize canvas on window resize
 window.addEventListener("resize", () => {
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
-  canvas.width = window.innerWidth;
   initParticles();
 });
 
@@ -73,6 +78,7 @@ function animate() {
 // Initialize
 initParticles();
 animate();
+
 
 // Select all menu links
 const navLinks = document.querySelectorAll('.nav-links a');
@@ -96,4 +102,12 @@ window.addEventListener('load', () => {
       text.classList.add('animate');
     }, index * 200); // Add delay for each menu item
   });
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth <= 768) {
+      canvas.width = window.innerWidth; // Set canvas width for mobile
+      canvas.height = window.innerHeight; // Set canvas height for mobile
+      initParticles(); // Reinitialize particles
+  }
 });

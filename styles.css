@@ -157,6 +157,32 @@ html, body {
 
 /* Mobile Menu at the Bottom */
 @media (max-width: 768px) {
+
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+}
+
+/* Fix canvas overflow */
+#hero-bg {
+  width: 100vw; /* Ensure canvas fits the viewport width */
+  height: 100vh; /* Ensure canvas fits the viewport height */
+}
+
+/* Ensure ASCII art fits */
+#ascii-art {
+  max-width: 100%; /* Ensure it doesn't exceed the screen width */
+  font-size: 2vw; /* Adjust font size relative to the viewport width */
+  white-space: pre-wrap; /* Allow wrapping if necessary */
+  overflow: hidden; /* Ensure no horizontal scrolling occurs */
+  margin: 0 auto; /* Center align the container */
+}
+
+ /* Adjust gallery items to prevent overflow */
+ .project-card, .photo-card {
+  flex: 1 1 100%; /* Ensure cards take full width */
+  max-width: 100%;
+}
   .mobile-nav {
     position: fixed;
     bottom: 0;
