@@ -161,6 +161,15 @@ header h1 {
 
 /* Mobile adjustments in bstyles.css */
 @media (max-width: 768px) {
+  .canvas-container {
+    height: 70vh; /* Allow space for keyboard */
+    touch-action: manipulation;
+}
+.shape[contenteditable="true"] {
+  transform: translateZ(0); /* Force hardware acceleration */
+  overflow: visible;
+}
+  
   .toolbar > * {
     flex: 1 1 18%;
     padding: 8px;
@@ -177,4 +186,44 @@ header h1 {
   .toolbar label input {
     width: 80%;
   }
+}
+
+/* Layer controls styling */
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.layer-name {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+}
+
+.layer-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.layer-up, .layer-down {
+  background: #007bff !important;
+  color: white !important;
+  padding: 3px 8px !important;
+}
+
+/* Mobile text editing */
+/* Add these styles */
+.shape[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+  outline: 2px solid #007bff !important;
+}
+
+/* Prevent text selection during normal interactions */
+.shape {
+  -webkit-user-select: none;
+  user-select: none;
 }

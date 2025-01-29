@@ -12,6 +12,9 @@ const exportButton = document.getElementById('export-drawing');
 const importInput = document.getElementById('import-drawing');
 
 const rectColorPicker = document.getElementById('rect-color-picker');
+let lastTouchTime = 0;
+const doubleTapThreshold = 300;
+
 
 let selectedShape = null;
 
@@ -37,6 +40,11 @@ function createShape(type) {
 
     canvas.appendChild(shape);
     updateLayers();
+// Add these event listeners
+shape.addEventListener('click', handleSelection);
+shape.addEventListener('touchstart', handleTouchSelection);
+shape.addEventListener('dblclick', startTextEditing);
+shape.addEventListener('touchend', handleDoubleTap);
 
     shape.addEventListener('click', () => {
         if (selectedShape) {
@@ -362,15 +370,48 @@ function getRotationAngle(element) {
     return Math.round(Math.atan2(b, a) * (180 / Math.PI));
 }
 
-// Update Layers
+// Update updateLayers function
 function updateLayers() {
     layersPanel.innerHTML = '<h3>Layers</h3>';
     const shapes = Array.from(canvas.children);
+    
     shapes.forEach((shape, index) => {
         const layer = document.createElement('div');
         layer.className = 'layer-item';
-        layer.textContent = `Layer ${index + 1}`;
-        layer.appendChild(createDeleteButton(shape));
+        layer.innerHTML = `
+            <input type="text" class="layer-name" value="Layer ${index + 1}">
+            <div class="layer-controls">
+                <button class="layer-up">↑</button>
+                <button class="layer-down">↓</button>
+                ${createDeleteButton(shape).outerHTML}
+            </div>
+        `;
+
+        const nameInput = layer.querySelector('.layer-name');
+        const upButton = layer.querySelector('.layer-up');
+        const downButton = layer.querySelector('.layer-down');
+
+        // Rename layer
+        nameInput.addEventListener('change', () => {
+            layer.querySelector('.layer-name').value = nameInput.value;
+        });
+
+        // Move layer up
+        upButton.addEventListener('click', () => {
+            if (index > 0) {
+                canvas.insertBefore(shape, canvas.children[index - 1]);
+                updateLayers();
+            }
+        });
+
+        // Move layer down
+        downButton.addEventListener('click', () => {
+            if (index < shapes.length - 1) {
+                canvas.insertBefore(shape, canvas.children[index + 1].nextSibling);
+                updateLayers();
+            }
+        });
+
         layersPanel.appendChild(layer);
     });
 }
@@ -508,6 +549,86 @@ function updateRectColor() {
     if (selectedShape && selectedShape.classList.contains('shape')) {
         selectedShape.style.backgroundColor = rectColorPicker.value;
     }
+}
+
+// Add these new handler functions
+function handleTouchSelection(e) {
+    e.preventDefault();
+    handleSelection(e);
+    // Prevent immediate deselection on mobile
+    if (selectedShape) {
+        e.stopPropagation();
+    }
+}
+
+function handleSelection(e) {
+    if (selectedShape) {
+        selectedShape.classList.remove('selected');
+        removeResizeHandles(selectedShape);
+        removeRotationHandle(selectedShape);
+        removeCornerRadiusHandles(selectedShape);
+    }
+    
+    const shape = e.target.closest('.shape');
+    selectedShape = shape;
+    shape.classList.add('selected');
+    
+    if (shape.textContent) {
+        textContentInput.value = shape.textContent;
+        textSizeInput.value = parseInt(getComputedStyle(shape).fontSize, 10);
+    }
+    
+    addResizeHandles(shape);
+    addRotationHandle(shape);
+    addCornerRadiusHandles(shape);
+}
+
+function handleDoubleTap(e) {
+    const currentTime = new Date().getTime();
+    const timeSinceLastTap = currentTime - lastTouchTime;
+    
+    if (timeSinceLastTap < doubleTapThreshold && timeSinceLastTap > 0) {
+        startTextEditing(e);
+        lastTouchTime = 0;
+    } else {
+        lastTouchTime = currentTime;
+    }
+}
+
+function startTextEditing(e) {
+    const shape = e.target.closest('.shape');
+    if (!shape || !shape.textContent) return;
+
+    e.preventDefault();
+    shape.contentEditable = true;
+    
+    // Mobile keyboard activation
+    setTimeout(() => {
+        shape.focus();
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(shape);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }, 100);
+
+    // Handle text input changes
+    const finishEditing = () => {
+        shape.contentEditable = false;
+        textContentInput.value = shape.textContent;
+        shape.removeEventListener('blur', finishEditing);
+        shape.removeEventListener('touchend', finishEditingOutside);
+    };
+
+    const finishEditingOutside = (e) => {
+        if (!shape.contains(e.target)) {
+            finishEditing();
+        }
+    };
+
+    shape.addEventListener('blur', finishEditing);
+    document.addEventListener('touchstart', finishEditingOutside);
+    document.addEventListener('click', finishEditingOutside);
 }
 
 exportButton.addEventListener('click', exportDrawing);
