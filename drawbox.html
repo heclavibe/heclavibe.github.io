@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Drawing App</title>
+    <link rel="stylesheet" href="bstyles.css">
+</head>
+<body>
+    <div class="toolbar">
+        <input type="color" id="color-picker" value="#ff0000">
+        <input type="color" id="rect-color-picker" value="#ff0000">
+        <button id="add-rectangle">Add Rectangle</button>
+        <button id="add-text">Add Text</button>
+        <label>
+            Radius:
+            <input type="number" id="corner-radius" value="0" min="0" max="100">
+        </label>
+        <label>
+            Text Content:
+            <input type="text" id="text-content" placeholder="Edit text">
+        </label>
+        <label>
+            Font Size:
+            <input type="number" id="text-size" value="16" min="8" max="72">
+        </label>
+        <button id="delete-shape">Delete</button>
+        <button id="export-drawing">Export</button>
+        <input type="file" id="import-drawing" accept=".bbdoc">
+    </div>
+    
+    <div class="canvas-container" id="canvas"></div>
+
+    <div class="layers-panel" id="layers-panel">
+        <h3>Layers</h3>
+    </div>
+
+    <script src="bscript.js"></script>
+</body>
+</html>
