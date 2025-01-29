@@ -91,6 +91,7 @@ function updateTextStyle() {
     }
 }
 
+// Update the addResizeHandles function
 function addResizeHandles(shape) {
     const handles = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
@@ -99,20 +100,28 @@ function addResizeHandles(shape) {
         handle.className = `resize-handle ${position}`;
         shape.appendChild(handle);
 
-        handle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
+        // Common handler function
+        const startResize = (e) => {
             e.preventDefault();
+            e.stopPropagation();
+
+            const isTouch = e.type === 'touchstart';
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
 
             const initialWidth = parseInt(getComputedStyle(shape).width, 10);
             const initialHeight = parseInt(getComputedStyle(shape).height, 10);
-            const initialX = e.clientX;
-            const initialY = e.clientY;
+            const initialX = clientX;
+            const initialY = clientY;
             const initialTop = parseInt(getComputedStyle(shape).top, 10);
             const initialLeft = parseInt(getComputedStyle(shape).left, 10);
 
-            document.onmousemove = (event) => {
-                const deltaX = event.clientX - initialX;
-                const deltaY = event.clientY - initialY;
+            const moveHandler = (moveEvent) => {
+                const moveX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
+                const moveY = isTouch ? moveEvent.touches[0].clientY : moveEvent.clientY;
+                
+                const deltaX = moveX - initialX;
+                const deltaY = moveY - initialY;
 
                 if (position.includes('right')) {
                     shape.style.width = `${initialWidth + deltaX}px`;
@@ -130,14 +139,30 @@ function addResizeHandles(shape) {
                 }
             };
 
-            document.onmouseup = () => {
-                document.onmousemove = null;
-                document.onmouseup = null;
+            const endHandler = () => {
+                if (isTouch) {
+                    document.removeEventListener('touchmove', moveHandler);
+                    document.removeEventListener('touchend', endHandler);
+                } else {
+                    document.removeEventListener('mousemove', moveHandler);
+                    document.removeEventListener('mouseup', endHandler);
+                }
             };
-        });
+
+            if (isTouch) {
+                document.addEventListener('touchmove', moveHandler, { passive: false });
+                document.addEventListener('touchend', endHandler);
+            } else {
+                document.addEventListener('mousemove', moveHandler);
+                document.addEventListener('mouseup', endHandler);
+            }
+        };
+
+        // Add both mouse and touch listeners
+        handle.addEventListener('mousedown', startResize);
+        handle.addEventListener('touchstart', startResize, { passive: false });
     });
 }
-
 function addCornerRadiusHandles(shape) {
     const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
     const handleSize = 14; // Size of the handle in pixels
@@ -220,33 +245,54 @@ function removeCornerRadiusHandles(shape) {
     handles.forEach((handle) => handle.remove());
 }
 
+// Update the addRotationHandle function
 function addRotationHandle(shape) {
     const handle = document.createElement('div');
     handle.className = 'rotation-handle';
     shape.appendChild(handle);
 
-    handle.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
+    const startRotate = (e) => {
         e.preventDefault();
+        e.stopPropagation();
 
+        const isTouch = e.type === 'touchstart';
+        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
         const shapeCenterX = shape.offsetLeft + shape.offsetWidth / 2;
-        let lastX = e.clientX;
+        let lastX = clientX;
         let currentRotation = getRotationAngle(shape);
 
-        document.onmousemove = (event) => {
-            const deltaX = event.clientX - lastX;
-            lastX = event.clientX;
+        const moveHandler = (moveEvent) => {
+            const moveX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
+            const deltaX = moveX - lastX;
+            lastX = moveX;
             const screenWidth = window.innerWidth;
-            const angleChange = (deltaX / (screenWidth / 2)) * 360; // 360-degree rotation for half the screen width
+            const angleChange = (deltaX / (screenWidth / 2)) * 360;
             currentRotation = (currentRotation + angleChange) % 360;
             shape.style.transform = `rotate(${currentRotation}deg)`;
         };
 
-        document.onmouseup = () => {
-            document.onmousemove = null;
-            document.onmouseup = null;
+        const endHandler = () => {
+            if (isTouch) {
+                document.removeEventListener('touchmove', moveHandler);
+                document.removeEventListener('touchend', endHandler);
+            } else {
+                document.removeEventListener('mousemove', moveHandler);
+                document.removeEventListener('mouseup', endHandler);
+            }
         };
-    });
+
+        if (isTouch) {
+            document.addEventListener('touchmove', moveHandler, { passive: false });
+            document.addEventListener('touchend', endHandler);
+        } else {
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', endHandler);
+        }
+    };
+
+    // Add both mouse and touch listeners
+    handle.addEventListener('mousedown', startRotate);
+    handle.addEventListener('touchstart', startRotate, { passive: false });
 }
 
 function removeResizeHandles(shape) {
@@ -259,29 +305,54 @@ function removeRotationHandle(shape) {
     if (handle) handle.remove();
 }
 
+// Update the dragElement function
 function dragElement(element) {
-    let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
+    let posX = 0, posY = 0, startX = 0, startY = 0;
 
-    element.onmousedown = (e) => {
+    const startDrag = (e) => {
         e.preventDefault();
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        document.onmousemove = (e) => {
-            e.preventDefault();
-            posX = mouseX - e.clientX;
-            posY = mouseY - e.clientY;
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            element.style.top = (element.offsetTop - posY) + 'px';
-            element.style.left = (element.offsetLeft - posX) + 'px';
-        };
-        document.onmouseup = () => {
-            document.onmousemove = null;
-            document.onmouseup = null;
-        };
-    };
-}
+        const isTouch = e.type === 'touchstart';
+        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+        
+        startX = clientX;
+        startY = clientY;
 
+        const moveHandler = (moveEvent) => {
+            const moveX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
+            const moveY = isTouch ? moveEvent.touches[0].clientY : moveEvent.clientY;
+            
+            posX = moveX - startX;
+            posY = moveY - startY;
+            startX = moveX;
+            startY = moveY;
+
+            element.style.top = (element.offsetTop + posY) + 'px';
+            element.style.left = (element.offsetLeft + posX) + 'px';
+        };
+
+        const endHandler = () => {
+            if (isTouch) {
+                document.removeEventListener('touchmove', moveHandler);
+                document.removeEventListener('touchend', endHandler);
+            } else {
+                document.removeEventListener('mousemove', moveHandler);
+                document.removeEventListener('mouseup', endHandler);
+            }
+        };
+
+        if (isTouch) {
+            document.addEventListener('touchmove', moveHandler, { passive: false });
+            document.addEventListener('touchend', endHandler);
+        } else {
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', endHandler);
+        }
+    };
+
+    element.addEventListener('mousedown', startDrag);
+    element.addEventListener('touchstart', startDrag, { passive: false });
+}
 function getRotationAngle(element) {
     const transform = getComputedStyle(element).transform;
     if (transform === 'none') return 0;
@@ -442,3 +513,6 @@ function updateRectColor() {
 exportButton.addEventListener('click', exportDrawing);
 importInput.addEventListener('change', importDrawing);
 rectColorPicker.addEventListener('input', updateRectColor);
+// Add this to bscript.js
+textSizeInput.addEventListener('input', updateTextStyle);
+

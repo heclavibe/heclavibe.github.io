@@ -41,6 +41,23 @@ body {
   font-size: 14px;
   margin-right: 5px;
 }
+/* Add to bstyles.css */
+.toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolbar > * {
+  flex: 1 1 18%;
+  min-width: 120px;
+  margin-right: 0;
+}
+
+/* Group related elements */
+.toolbar label {
+  display: flex;
+  flex-direction: column;
+}
 
 .shape {
   position: absolute;
@@ -140,4 +157,24 @@ header h1 {
   color: #ff7f50; /* Accent color for "LA" */
   font-weight: bold;
   letter-spacing: 1px; /* Slightly tighter spacing for "LA" */
+}
+
+/* Mobile adjustments in bstyles.css */
+@media (max-width: 768px) {
+  .toolbar > * {
+    flex: 1 1 18%;
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .toolbar button, 
+  .toolbar input, 
+  .toolbar select {
+    padding: 8px;
+    margin: 2px;
+  }
+  
+  .toolbar label input {
+    width: 80%;
+  }
 }
