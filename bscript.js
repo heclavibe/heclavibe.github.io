@@ -22,7 +22,7 @@ let selectedShape = null;
 function createShape(type) {
     const shape = document.createElement('div');
     shape.className = 'shape';
-    shape.style.backgroundColor = colorPicker.value;
+    shape.style.backgroundColor = rectColorPicker.value;
     shape.style.width = '100px';
     shape.style.height = '100px';
     shape.style.borderRadius = cornerRadius.value + 'px';
@@ -35,7 +35,7 @@ function createShape(type) {
         shape.style.alignItems = 'center';
         shape.style.justifyContent = 'center';
         shape.style.fontSize = '16px';
-        shape.style.color = '#000';
+        shape.style.color = colorPicker.value;
     }
 
     canvas.appendChild(shape);
@@ -86,7 +86,7 @@ function addTextToRectangle() {
         selectedShape.style.alignItems = 'center';
         selectedShape.style.justifyContent = 'center';
         selectedShape.style.fontSize = '16px';
-        selectedShape.style.color = '#000';
+        selectedShape.style.color = colorPicker.value;
     } else {
         createShape('text');
     }
