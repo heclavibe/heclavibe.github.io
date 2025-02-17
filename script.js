@@ -130,3 +130,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   observer.observe(video);
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const video = document.querySelector(".scroll-video");
+  video.setAttribute("webkit-playsinline", "");
+  video.setAttribute("playsinline", "");
+});
