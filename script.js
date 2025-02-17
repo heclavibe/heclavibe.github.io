@@ -111,3 +111,22 @@ window.addEventListener("resize", () => {
       initParticles(); // Reinitialize particles
   }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const video = document.querySelector(".scroll-video");
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          video.play();
+        } else {
+          video.pause();
+        }
+      });
+    },
+    { threshold: 0.5 } // Play when at least 50% of the video is visible
+  );
+
+  observer.observe(video);
+});
