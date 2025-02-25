@@ -110,6 +110,30 @@
     border-radius: 12px;
     box-shadow: inset 4px 4px 8px #b8b8b8, inset -4px -4px 8px #ffffff;
   }
+
+  /*Style for context menu (add to your CSS)*/
+.context-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 1000;
+}
+
+.undo-btn {
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.undo-btn:hover {
+  background: #f0f0f0;
+}
+
   .cell {
     width: 12px;
     height: 20px;
@@ -169,3 +193,5 @@
     margin-bottom: 10px;
   }
   }
+
+  
