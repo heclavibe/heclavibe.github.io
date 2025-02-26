@@ -8,12 +8,15 @@ const exportButton = document.getElementById('export');
 charPicker.value = charPicker.value || '*';
 let selectedChar = charPicker.value;
 let currentTool = 'brush';
+brushTool.classList.add('active');
+
 
 // Undo system variables
 let history = [];
 let currentStep = -1;
 let isDrawing = false;
 let lastTap = 0;
+let pendingChanges = new Set();
 
 // Context menu elements
 const contextMenu = document.createElement('div');
@@ -46,14 +49,14 @@ function createCanvas() {
     canvas.appendChild(cell);
   }
 }
-
+// Touch handling
 function handleTouchStart(e) {
   e.preventDefault();
   const touch = e.touches[0];
   const target = document.elementFromPoint(touch.clientX, touch.clientY);
   if (target?.classList.contains('cell')) {
-    draw(target);
     startDraw({ target });
+    draw(target);
   }
 }
 
@@ -61,32 +64,32 @@ function handleTouchMove(e) {
   e.preventDefault();
   const touch = e.touches[0];
   const target = document.elementFromPoint(touch.clientX, touch.clientY);
-  if (target?.classList.contains('cell')) {
-    draw(target);
+  if (target?.classList.contains('cell')) draw(target);
   }
-}
-
+// Drawing logic
 function startDraw(e) {
-  if (e.button !== 0) return; // Only left mouse button
+  if (e.button && e.button !== 0) return;
   isDrawing = true;
+  pendingChanges.clear();
   saveState();
   draw(e.target);
 }
 
 function continueDraw(e) {
-  if (isDrawing && e.buttons === 1) {
+  if (isDrawing && (e.buttons === 1 || e.touches)) {
     draw(e.target);
   }
 }
 
-// Modified drawing function to ensure character is set
 function draw(target) {
-  if (!target?.classList?.contains('cell')) return;
+  if (!target?.classList?.contains('cell') || pendingChanges.has(target)) return;
   
-  if (currentTool === 'brush') {
-    target.textContent = selectedChar;
-  } else if (currentTool === 'eraser') {
-    target.textContent = '';
+  const originalValue = target.textContent;
+  const newValue = currentTool === 'brush' ? selectedChar : '';
+  
+  if (originalValue !== newValue) {
+    target.textContent = newValue;
+    pendingChanges.add(target);
   }
 }
 
@@ -110,11 +113,20 @@ function saveState() {
   }
 }
 
+function endDrawing() {
+  if (pendingChanges.size > 0) {
+    pendingChanges.clear();
+    saveState();
+  }
+  isDrawing = false;
+}
+
+
 function undo() {
   if (currentStep > 0) {
     currentStep--;
-    history[currentStep].forEach((char, index) => {
-      canvas.children[index].textContent = char;
+    history[currentStep].forEach((char, i) => {
+      canvas.children[i].textContent = char;
     });
   }
 }
@@ -152,8 +164,9 @@ canvas.addEventListener('touchend', e => {
   lastTap = now;
 });
 
-document.addEventListener('mouseup', () => isDrawing = false);
-document.addEventListener('touchend', () => isDrawing = false);
+// Update event listeners for ending drawing
+document.addEventListener('mouseup', endDrawing);
+document.addEventListener('touchend', endDrawing);
 
 // Existing tool event listeners...
 brushTool.addEventListener('click', () => {
