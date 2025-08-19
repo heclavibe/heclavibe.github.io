@@ -1,0 +1,503 @@
+
+
+#ascii-art {
+  position: absolute;
+  font-family: monospace;
+  white-space: nowrap;
+  animation: scroll 10s linear infinite;
+  background-color: none;
+  color: limegreen;
+  white-space: pre;
+  overflow: hidden;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+
+@keyframes scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background: #e0e0e0;
+  color: #333;
+}
+html, body {
+  overflow-x: hidden;
+}
+/* Desktop Menu Styling */
+.nav-links {
+  list-style: none;
+  display: flex;
+  justify-content: center; /* Center the menu items */
+  align-items: center;
+  gap: 30px; /* Space between menu items */
+  padding: 0;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: 'Arial', sans-serif;
+  text-transform: uppercase;
+  padding: 15px 20px;
+  border-radius: 25px;
+  background: linear-gradient(145deg, #e0e0e0, #f0f0f0);
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+  transition: all 0.3s ease;
+  display: flex; /* Ensure flexbox layout for spacing */
+  align-items: center;
+  gap: 10px; /* Add space between icon and text */
+}
+
+.nav-links .icon {
+  font-size: 1.2rem; /* Icon size */
+  color: #ff7f50; /* Optional: Set a color for the icon */
+}
+
+.nav-links .text {
+  opacity: 0; /* For animation */
+  transform: translateY(30px); /* Slide down effect */
+  transition: all 0.3s ease; /* Smooth hover effects */
+}
+
+
+.nav-links a:hover {
+  color: #ff7f50; /* Highlight text color on hover */
+  box-shadow: inset 5px 5px 15px #bebebe, inset -5px -5px 15px #ffffff; /* Inset hover effect */
+  background: linear-gradient(145deg, #f0f0f0, #d6d6d6); /* Lighter background on hover */
+}
+
+.nav-links a.animate {
+  animation: fadeIn 1s ease forwards; /* Apply fade-in animation */
+}
+
+/* Keyframes for Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px); /* Start slightly below */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* Slide into place */
+  }
+}
+
+/* Text Styling Inside Menu Links */
+.nav-links .text {
+  color: #333;
+  font-size: 1rem; /* Larger font size for better visibility */
+  font-weight: 400; /* Bold text */
+  font-family: 'Arial', sans-serif;
+  text-transform: none; /* Uppercase for stylization */
+  opacity: 0; /* Initial opacity for animation */
+  transform: translateY(30px); /* Slide down effect for animation */
+  transition: all 0.3s ease; /* Smooth transition for hover effects */
+}
+
+.nav-links a:hover .text {
+  color: #ff7f50; /* Highlight text color on hover */
+}
+
+.nav-links .text.animate {
+  animation: fadeIn 1s ease forwards; /* Apply fade-in animation */
+}
+
+/* Keyframes for Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(30px); /* Start slightly below */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0); /* Slide into place */
+  }
+}
+
+
+
+/* Logo at the Top */
+
+
+.header-container {
+  position: sticky;
+  top: 0;
+  background: #e0e0e0;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  text-align: center;
+}
+
+.logo {
+  font-size: 1.5rem; /* Slightly smaller size */
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 2px; /* Add some spacing between letters */
+  font-family: 'Arial', sans-serif;
+  text-transform: uppercase;
+}
+
+.logo .highlight {
+  color: #ff7f50; /* Accent color for "LA" */
+  font-weight: bold;
+  letter-spacing: 1px; /* Slightly tighter spacing for "LA" */
+}
+
+/* Mobile Menu at the Bottom */
+@media (max-width: 768px) {
+
+  /* Prevent horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+}
+
+/* Fix canvas overflow */
+#hero-bg {
+  width: 100vw; /* Ensure canvas fits the viewport width */
+  height: 100vh; /* Ensure canvas fits the viewport height */
+}
+
+/* Ensure ASCII art fits */
+#ascii-art {
+  max-width: 100%; /* Ensure it doesn't exceed the screen width */
+  font-size: 2vw; /* Adjust font size relative to the viewport width */
+  white-space: pre-wrap; /* Allow wrapping if necessary */
+  overflow: hidden; /* Ensure no horizontal scrolling occurs */
+  margin: 0 auto; /* Center align the container */
+}
+
+ /* Adjust gallery items to prevent overflow */
+ .project-card, .photo-card {
+  flex: 1 1 100%; /* Ensure cards take full width */
+  max-width: 100%;
+}
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #e0e0e0;
+    padding: 10px 20px;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensure it stays on top */
+    display: flex;
+    justify-content: space-around; /* Spread menu items evenly */
+  }
+
+  .nav-links {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .nav-links li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: #555;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 38px; /* 25% smaller */
+    height: 38px; /* 25% smaller */
+    border-radius: 50%;
+    background: #e0e0e0;
+    box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+    transition: all 0.3s ease;
+    font-size: 1rem; /* Slightly smaller icon size */
+  }
+
+  .nav-links a:hover {
+    box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+  }
+
+  .nav-links .text {
+    margin-top: 5px; /* Space between the circle and the text */
+    font-size: 0.7rem; /* Slightly smaller font */
+    color: #555;
+  }
+}
+
+
+
+/* Hero Section */
+.hero-section {
+  position: static;
+  text-align: center;
+  padding: 100px 20px;
+  overflow: hidden; /* Ensure the canvas doesn't exceed the section */
+}
+
+#hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  color: #444;
+  position: relative; /* To ensure it appears above the canvas */
+}
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: #444;
+  position: relative; /* To ensure it appears above the canvas */
+}
+
+.hero-description {
+  margin: 15px 0;
+  color: #666;
+  position: relative;
+}
+.button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: #555;
+  text-decoration: none;
+  background: #e0e0e0;
+  border-radius: 50px;
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  box-shadow: inset 5px 5px 15px #bebebe, inset -5px -5px 15px #ffffff;
+}
+
+/* Main Container */
+.main-container {
+  max-width: 900px;
+  margin: 0px auto;
+  padding: 20px;
+  background: #e0e0e0;
+  border-radius: 20px;
+  box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+}
+
+/* Project Gallery */
+.project-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.project-card {
+  background: #e0e0e0;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+  flex: 1 1 calc(30% - 20px);
+  max-width: calc(40% - 20px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.project-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.project-card a {
+  text-decoration: none;
+    color: #f66d6d;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-family: 'Arial', sans-serif;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    align-items: center;
+    gap: 10px; /* Add space between icon and text */
+}
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+}
+/* Education Section */
+.teaching-philosophy {
+  margin-bottom: 30px;
+}
+
+.teaching-philosophy h3 {
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.teaching-philosophy p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+/* Student Work Gallery */
+.student-work {
+  margin-top: 30px;
+}
+
+.student-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.student-card {
+  background: #e0e0e0;
+  border-radius: 15px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 10px 10px 20px #bebebe, -10px -10px 20px #ffffff;
+  flex: 1 1 calc(30% - 20px); /* Responsive three-column layout */
+  max-width: calc(30% - 20px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.scroll-video {
+  width: 100%;
+  max-width: 400px;
+}
+
+.student-card video {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+}
+
+.student-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.student-card p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Photography Section */
+.photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.photo-card {
+  flex: 1 1 calc(33.333% - 20px); /* Three-column layout */
+  max-width: calc(33.333% - 20px);
+  border-radius: 10px;
+  overflow: hidden; /* Clip overflowing images */
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease; /* Smooth zoom effect on hover */
+}
+
+.photo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 5px 5px 15px #bebebe, -5px -5px 15px #ffffff;
+}
+
+.photo-card:hover img {
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+
+/* Contact Section */
+.contact-details {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-details li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contact-details a {
+  text-decoration: none;
+  color: #555;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff;
+  transition: all 0.3s ease;
+  width: fit-content; /* Button size adjusts to content */
+}
+
+.contact-details a:hover {
+  box-shadow: inset 5px 5px 10px #bebebe, inset -5px -5px 10px #ffffff;
+}
+
+.contact-details .icon {
+  font-size: 1.2rem;
+  color: #ff7f50;
+}
+
+.contact-details .text {
+  font-size: 1rem;
+}
+
+/* Footer Info */
+.footer-info {
+  margin-top: 20px;
+  padding: 15px 10px; /* Add padding for better visibility */
+  text-align: center; /* Center align the text */
+  background: #787c8d; /* Highlight background color for visibility */
+  color: #ffffff; /* Contrast text color */
+  font-size: 1rem; /* Slightly larger font size */
+  font-weight: bold; /* Make the text bold */
+  border-radius: 10px; /* Soft rounded edges for a neumorphic feel */
+  box-shadow: 5px 5px 10px #bebebe, -5px -5px 10px #ffffff; /* Neumorphic effect */
+}

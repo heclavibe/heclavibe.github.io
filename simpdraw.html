@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Drawing App</title>
+    <link rel="stylesheet" href="bstyles.css">
+    <link rel="icon" href="favicon.png">
+    <!-- Add viewport meta tag in drawbox.html -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!--<pre>
+        \\   // 
+        \\  ||  _____    ____  ||               
+        ||  || | ----   //---  ||      \ \         //    ||        
+        ||===| ||\+ |  //      ||       \ \       //  () ||         //==\\
+        ||  || || \ | ||       ||   //   \ \     //      ||_____   //    \\
+        ||  || |\  \|  \\      ||  //\\   \ \   //  //   ||---- \ //______\\
+        /|  ||  \\  v   \\     ||//   \\   \ \ //  //    ||    || ||   by Hector Torres @2025
+       //    \   \\__    \\___ |//_____\\   \ //  //     ||____||  \\     //
+      //          ---     \––– |————————\\   \/  |/      ||____/    \====//
+                                         \\
+      </pre>-->
+</head>
+<body>
+    <header>
+        <h1 class="logo"><a href="index.html">Hec<span class="highlight">LA</span>vibe</a> SimpDraw Free Warez</h1>
+      </header>
+    <div class="toolbar">
+    <label >
+        Rec:
+        <input type="color" class="swatchBox" id="rect-color-picker" value="#123456">
+    </label>
+        <button id="add-rectangle">Add Rectangle</button>
+        <button id="add-text">Add Text</button>
+        <label>
+            Radius:
+            <input type="number" id="corner-radius" value="0" min="0" max="100">
+        </label>
+        <label style="display:none">
+            Text Content:
+            <input type="text" id="text-content" placeholder="Edit text">
+        </label>
+        <label>
+            Size:
+            <input type="number" id="text-size" value="16" min="8" max="72">
+        </label>
+        <label>
+            Font:
+        <input type="color" class="swatchBox" id="color-picker" value="#f1bbaa">
+    </label>
+        <button id="delete-shape">Delete</button>
+        <button id="export-drawing">Export</button>
+        <label>
+            Import:
+        <input type="file" id="import-drawing" accept=".bbdoc">        
+    </label>
+
+    </div>
+    
+    <div class="canvas-container" id="canvas"></div>
+
+    <div class="layers-panel" id="layers-panel">
+        <h3>Layers</h3>
+    </div>
+    <footer>
+        <p><a href="index.html">HecLAvibe</a> SimpDraw Free Warez - Create DIV art easily!</p>
+        <p>&copy; 2025 Hector Torres. All rights reserved.</p>
+      </footer>
+    <script src="bscript.js"></script>
+</body>
+</html>
