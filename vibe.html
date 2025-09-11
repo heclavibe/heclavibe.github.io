@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .focus-mode { background: linear-gradient(135deg, #3b82f6, #8b5cf6); }
+        .short-break-mode { background: linear-gradient(135deg, #10b981, #14b8a6); }
+        .long-break-mode { background: linear-gradient(135deg, #f97316, #ef4444); }
+
+        .timer-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .session-count {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .progress-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 40px;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-ring circle {
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .timer-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .time-text {
+            font-size: 48px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .status-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .mode-switcher {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .mode-btn.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sound-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 24px;
+        }
+
+        .sound-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sound-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sound-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .sound-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .sound-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .sound-btn.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .sound-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sound-emoji {
+            font-size: 18px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-icon {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .stats {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .stats-number {
+            color: white;
+            font-weight: 500;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { opacity: 0.3; transform: translateY(0px); }
+            50% { opacity: 0.8; transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container focus-mode" id="container">
+        <div class="timer-card">
+            <!-- Header -->
+            <div class="header">
+                <h1 id="modeLabel">Focus Time</h1>
+                <div class="session-count">Session #<span id="sessionCount">1</span></div>
+            </div>
+
+            <!-- Progress Circle -->
+            <div class="progress-container">
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                    <circle id="progressCircle" cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="3" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"/>
+                </svg>
+                <div class="timer-display">
+                    <div class="time-text" id="timeDisplay">25:00</div>
+                    <div class="status-text" id="statusText">Paused</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" id="playPauseBtn">
+                    ▶️
+                </button>
+                <button class="control-btn" id="resetBtn">
+                    🔄
+                </button>
+            </div>
+
+            <!-- Mode Switcher -->
+            <div class="mode-switcher">
+                <button class="mode-btn active" data-mode="focus">Focus</button>
+                <button class="mode-btn inactive" data-mode="shortBreak">Break</button>
+                <button class="mode-btn inactive" data-mode="longBreak">Long</button>
+            </div>
+
+            <!-- Sound Controls -->
+            <div class="sound-section">
+                <div class="sound-header">
+                    <span class="sound-label">Ambient Sounds</span>
+                    <button class="sound-toggle" id="soundToggle">
+                        🔇
+                    </button>
+                </div>
+                
+                <div class="sound-grid">
+                    <button class="sound-btn active" data-sound="rain">
+                        <span class="sound-emoji">🌧️</span>
+                        Rain
+                    </button>
+                    <button class="sound-btn inactive" data-sound="forest">
+                        <span class="sound-emoji">🌲</span>
+                        Forest
+                    </button>
+                    <button class="sound-btn inactive" data-sound="ocean">
+                        <span class="sound-emoji">🌊</span>
+                        Ocean
+                    </button>
+                    <button class="sound-btn inactive" data-sound="cafe">
+                        <span class="sound-emoji">☕</span>
+                        Café
+                    </button>
+                    <button class="sound-btn inactive" data-sound="silence">
+                        <span class="sound-emoji">🔇</span>
+                        Silence
+                    </button>
+                    <button class="sound-btn inactive" data-sound="white">
+                        <span class="sound-emoji">📻</span>
+                        White
+                    </button>
+                </div>
+
+                <div class="volume-control">
+                    <span class="volume-icon">🔇</span>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                    <span class="volume-icon">🔊</span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                Sessions completed: <span class="stats-number" id="completedSessions">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <script>
+        // Timer state
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+        let isActive = false;
+        let currentMode = 'focus';
+        let sessions = 0;
+        let currentSound = 'rain';
+        let isSoundPlaying = false;
+        let soundVolume = 0.5;
+        let timerInterval = null;
+
+        // Audio context for ambient sounds
+        let audioContext = null;
+        let currentSource = null;
+        let gainNode = null;
+
+        const modes = {
+            focus: { duration: 25 * 60, label: 'Focus Time', className: 'focus-mode' },
+            shortBreak: { duration: 5 * 60, label: 'Short Break', className: 'short-break-mode' },
+            longBreak: { duration: 15 * 60, label: 'Long Break', className: 'long-break-mode' }
+        };
+
+        // DOM elements
+        const container = document.getElementById('container');
+        const modeLabel = document.getElementById('modeLabel');
+        const sessionCount = document.getElementById('sessionCount');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const statusText = document.getElementById('statusText');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const soundToggle = document.getElementById('soundToggle');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const completedSessions = document.getElementById('completedSessions');
+        const progressCircle = document.getElementById('progressCircle');
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = (Math.random() * 4 + 2) + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Format time display
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Update display
+        function updateDisplay() {
+            timeDisplay.textContent = formatTime(timeLeft);
+            statusText.textContent = isActive ? 'Running' : 'Paused';
+            modeLabel.textContent = modes[currentMode].label;
+            sessionCount.textContent = sessions + 1;
+            completedSessions.textContent = sessions;
+
+            // Update progress circle
+            const progress = ((modes[currentMode].duration - timeLeft) / modes[currentMode].duration) * 100;
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (progress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+
+            // Update background
+            container.className = `container ${modes[currentMode].className}`;
+
+            // Update play/pause button
+            playPauseBtn.textContent = isActive ? '⏸️' : '▶️';
+        }
+
+        // Timer logic
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    // Timer finished
+                    clearInterval(timerInterval);
+                    isActive = false;
+                    
+                    if (currentMode === 'focus') {
+                        sessions++;
+                        // Auto switch to break
+                        const nextMode = sessions > 0 && sessions % 4 === 0 ? 'longBreak' : 'shortBreak';
+                        switchMode(nextMode);
+                    } else {
+                        // Break finished, back to focus
+                        switchMode('focus');
+                    }
+                }
+                
+                updateDisplay();
+            }, 1000);
+        }
+
+        // Toggle timer
+        function toggleTimer() {
+            isActive = !isActive;
+            if (isActive) {
+                startTimer();
+            } else {
+                clearInterval(timerInterval);
+            }
+            updateDisplay();
+        }
+
+        // Reset timer
+        function resetTimer() {
+            isActive = false;
+            clearInterval(timerInterval);
+            timeLeft = modes[currentMode].duration;
+            updateDisplay();
+        }
+
+        // Switch mode
+        function switchMode(newMode) {
+            currentMode = newMode;
+            timeLeft = modes[newMode].duration;
+            isActive = false;
+            clearInterval(timerInterval);
+            
+            // Update mode buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                if (btn.dataset.mode === newMode) {
+                    btn.className = 'mode-btn active';
+                } else {
+                    btn.className = 'mode-btn inactive';
+                }
+            });
+            
+            updateDisplay();
+        }
+
+        // Create noise buffer for ambient sounds
+        function createNoiseBuffer(type) {
+            const bufferSize = audioContext.sampleRate * 2;
+            const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = buffer.getChannelData(0);
+
+            for (let i = 0; i < bufferSize; i++) {
+                switch(type) {
+                    case 'rain':
+                        output[i] = (Math.random() * 2 - 1) * (Math.sin(i * 0.01) * 0.5 + 0.5);
+                        break;
+                    case 'ocean':
+                        output[i] = (Math.random() * 2 - 1) * Math.sin(i * 0.001) * 0.7;
+                        break;
+                    case 'forest':
+                        output[i] = (Math.random() * 2 - 1) * 0.3 + Math.sin(i * 0.005) * 0.2;
+                        break;
+                    case 'cafe':
+                        output[i] = (Math.random() * 2 - 1) * 0.4;
+                        break;
+                    case 'white':
+                        output[i] = Math.random() * 2 - 1;
+                        break;
+                    default:
+                        output[i] = Math.random() * 2 - 1;
+                }
+            }
+            return buffer;
+        }
+
+        // Start ambient sound
+        async function startAmbientSound(soundType) {
+            if (soundType === 'silence') return;
+            
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                if (audioContext.state === 'suspended') {
+                    await audioContext.resume();
+                }
+
+                // Stop current sound
+                if (currentSource) {
+                    currentSource.stop();
+                }
+
+                // Create new sound
+                const noiseBuffer = createNoiseBuffer(soundType);
+                currentSource = audioContext.createBufferSource();
+                currentSource.buffer = noiseBuffer;
+                currentSource.loop = true;
+                
+                // Create gain node
+                gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
+                
+                // Create filter
+                const filter = audioContext.createBiquadFilter();
+                
+                switch(soundType) {
+                    case 'rain':
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(1200, audioContext.currentTime);
+                        break;
+                    case 'ocean':
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(400, audioContext.currentTime);
+                        break;
+                    case 'forest':
+                        filter.type = 'bandpass';
+                        filter.frequency.setValueAtTime(800, audioContext.currentTime);
+                        break;
+                    case 'cafe':
+                        filter.type = 'highpass';
+                        filter.frequency.setValueAtTime(200, audioContext.currentTime);
+                        break;
+                    case 'white':
+                        filter.type = 'allpass';
+                        break;
+                }
+                
+                // Connect audio graph
+                currentSource.connect(filter);
+                filter.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Start playing
+                currentSource.start(0);
+                
+            } catch (error) {
+                console.log('Audio not supported:', error);
+            }
+        }
+
+        // Stop ambient sound
+        function stopAmbientSound() {
+            if (currentSource) {
+                try {
+                    currentSource.stop();
+                    currentSource = null;
+                } catch (error) {
+                    // Ignore errors when stopping
+                }
+            }
+        }
+
+        // Toggle sound
+        async function toggleSound() {
+            if (isSoundPlaying) {
+                stopAmbientSound();
+                isSoundPlaying = false;
+                soundToggle.textContent = '🔇';
+            } else {
+                await startAmbientSound(currentSound);
+                isSoundPlaying = true;
+                soundToggle.textContent = '🔊';
+            }
+        }
+
+        // Change sound
+        function changeSound(newSound) {
+            currentSound = newSound;
+            
+            // Update sound buttons
+            document.querySelectorAll('.sound-btn').forEach(btn => {
+                if (btn.dataset.sound === newSound) {
+                    btn.className = 'sound-btn active';
+                } else {
+                    btn.className = 'sound-btn inactive';
+                }
+            });
+            
+            if (isSoundPlaying) {
+                stopAmbientSound();
+                if (currentSound !== 'silence') {
+                    startAmbientSound(currentSound);
+                }
+            }
+        }
+
+        // Update volume
+        function updateVolume() {
+            soundVolume = volumeSlider.value / 100;
+            if (gainNode && isSoundPlaying) {
+                gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
+            }
+        }
+
+        // Event listeners
+        playPauseBtn.addEventListener('click', toggleTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        soundToggle.addEventListener('click', toggleSound);
+        volumeSlider.addEventListener('input', updateVolume);
+
+        // Mode buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+        });
+
+        // Sound buttons
+        document.querySelectorAll('.sound-btn').forEach(btn => {
+            btn.addEventListener('click', () => changeSound(btn.dataset.sound));
+        });
+
+        // Initialize
+        createParticles();
+        updateDisplay();
+    </script>
+</body>
+</html>

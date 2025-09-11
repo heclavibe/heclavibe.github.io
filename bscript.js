@@ -5,23 +5,50 @@ const addText = document.getElementById('add-text');
 const cornerRadius = document.getElementById('corner-radius');
 const deleteShape = document.getElementById('delete-shape');
 const layersPanel = document.getElementById('layers-panel');
-const textContentInput = document.getElementById('text-content');
 const textSizeInput = document.getElementById('text-size');
-
 const exportButton = document.getElementById('export-drawing');
-const importInput = document.getElementById('import-drawing');
-
 const rectColorPicker = document.getElementById('rect-color-picker');
+const rectColorAlpha = document.getElementById('rect-color-alpha');
+const textColorPicker = document.getElementById('text-color-picker');
+const fontFamilySelect = document.getElementById('font-family');
+const exportFormat = document.getElementById('export-format');
+const importFile = document.getElementById('import-file');
+
 let lastTouchTime = 0;
 const doubleTapThreshold = 300;
-
-
 let selectedShape = null;
 
+// Helper function to convert RGB to Hex with alpha
+function rgbToHex(rgb) {
+    const rgbValues = rgb.match(/\d+/g);
+    if (!rgbValues) return '#000000';
+    
+    const r = parseInt(rgbValues[0]).toString(16).padStart(2, '0');
+    const g = parseInt(rgbValues[1]).toString(16).padStart(2, '0');
+    const b = parseInt(rgbValues[2]).toString(16).padStart(2, '0');
+    const a = rgbValues[3] ? Math.round(parseFloat(rgbValues[3]) * 255).toString(16).padStart(2, '0') : 'ff';
+    
+    return `#${r}${g}${b}${a}`;
+}
 
-function createShape(type) {
+// Helper function to get alpha from rgba
+function getAlphaFromRgba(rgba) {
+    const match = rgba.match(/[\d.]+\)$/);
+    return match ? Math.round(parseFloat(match[0]) * 100) : 100;
+}
+
+// Create shape function
+function createShape(type, customName) {
     const shape = document.createElement('div');
     shape.className = 'shape';
+    shape.dataset.layerName = customName || `Layer ${canvas.children.length + 1}`;
+    shape.dataset.locked = 'false';
+
+    if(type === 'image') {
+        shape.classList.add('image');
+        shape.style.backgroundSize = 'cover';
+    }
+    
     shape.style.backgroundColor = rectColorPicker.value;
     shape.style.width = '100px';
     shape.style.height = '100px';
@@ -34,17 +61,23 @@ function createShape(type) {
         shape.style.display = 'flex';
         shape.style.alignItems = 'center';
         shape.style.justifyContent = 'center';
-        shape.style.fontSize = '16px';
-        shape.style.color = colorPicker.value;
+        shape.style.fontSize = textSizeInput.value + 'px';
+        shape.style.color = textColorPicker.value;
+        shape.style.fontFamily = fontFamilySelect.value;
     }
 
     canvas.appendChild(shape);
+    setupShapeEvents(shape);
     updateLayers();
-// Add these event listeners
-shape.addEventListener('click', handleSelection);
-shape.addEventListener('touchstart', handleTouchSelection);
-shape.addEventListener('dblclick', startTextEditing);
-shape.addEventListener('touchend', handleDoubleTap);
+    return shape;
+}
+
+// Setup shape events
+function setupShapeEvents(shape) {
+    shape.addEventListener('click', handleSelection);
+    shape.addEventListener('touchstart', handleTouchSelection);
+    shape.addEventListener('dblclick', startTextEditing);
+    shape.addEventListener('touchend', handleDoubleTap);
 
     shape.addEventListener('click', () => {
         if (selectedShape) {
@@ -55,51 +88,270 @@ shape.addEventListener('touchend', handleDoubleTap);
         }
         selectedShape = shape;
         shape.classList.add('selected');
+        updateLayers();
+        
+        // Update all controls to match selected shape's properties
+        const bgColor = getComputedStyle(shape).backgroundColor;
+        rectColorPicker.value = rgbToHex(bgColor);
+        
+        // Update corner radius
+        const currentRadius = parseInt(getComputedStyle(shape).borderRadius) || 0;
+        cornerRadius.value = currentRadius;
+        
+        // Update text properties if it's a text element
         if (shape.textContent) {
-            textContentInput.value = shape.textContent;
-            textSizeInput.value = parseInt(getComputedStyle(shape).fontSize, 10);
+            textSizeInput.value = parseInt(getComputedStyle(shape).fontSize) || 16;
+            textColorPicker.value = rgbToHex(getComputedStyle(shape).color);
+            fontFamilySelect.value = getComputedStyle(shape).fontFamily;
         }
+        
         addResizeHandles(shape);
         addRotationHandle(shape);
         addCornerRadiusHandles(shape);
     });
 
-    shape.addEventListener('dblclick', () => {
-        if (shape.textContent) {
-            shape.contentEditable = true;
-            shape.focus();
-
-            shape.addEventListener('blur', () => {
-                shape.contentEditable = false;
-                textContentInput.value = shape.textContent;
-            });
-        }
-    });
-
     dragElement(shape);
 }
 
+// Handle selection
+function handleSelection(e) {
+    if (selectedShape) {
+        selectedShape.classList.remove('selected');
+        removeResizeHandles(selectedShape);
+        removeRotationHandle(selectedShape);
+        removeCornerRadiusHandles(selectedShape);
+    }
+    
+    const shape = e.target.closest('.shape');
+    if (!shape) return;
+    
+    selectedShape = shape;
+    shape.classList.add('selected');
+    
+    // Update all controls to match selected shape's properties
+    const bgColor = getComputedStyle(shape).backgroundColor;
+    rectColorPicker.value = rgbToHex(bgColor);
+    
+    // Update corner radius
+    const currentRadius = parseInt(getComputedStyle(shape).borderRadius) || 0;
+    cornerRadius.value = currentRadius;
+    
+    // Update text properties if it's a text element
+    if (shape.textContent) {
+        textSizeInput.value = parseInt(getComputedStyle(shape).fontSize) || 16;
+        textColorPicker.value = rgbToHex(getComputedStyle(shape).color);
+        fontFamilySelect.value = getComputedStyle(shape).fontFamily;
+    }
+    
+    addResizeHandles(shape);
+    addRotationHandle(shape);
+    addCornerRadiusHandles(shape);
+    updateLayers();
+}
+
+// Handle touch selection
+function handleTouchSelection(e) {
+    e.preventDefault();
+    handleSelection(e);
+    if (selectedShape) {
+        e.stopPropagation();
+    }
+    updateLayers();
+}
+
+// Update layers panel
+function updateLayers() {
+    layersPanel.innerHTML = `
+        <div class="layers-header">
+            <h3>Layers</h3>
+            <button class="minimize-layers">−</button>
+            <button class="hide-layers">👁</button>
+        </div>
+        <div class="layers-content">
+            ${Array.from(canvas.children).map((shape, index) => `
+                <div class="layer-item ${shape === selectedShape ? 'selected-layer' : ''}" draggable="true" data-index="${index}">
+                    <div class="layer-visibility">
+                        <input type="checkbox" class="layer-visible" ${shape.style.display !== 'none' ? 'checked' : ''}>
+                    </div>
+                    <div class="layer-lock">
+                        <input type="checkbox" class="layer-locked" ${shape.dataset.locked === 'true' ? 'checked' : ''}>
+                    </div>
+                    <input type="text" class="layer-name" value="${shape.dataset.layerName}">
+                    <div class="layer-controls">
+                        <button class="layer-up">↑</button>
+                        <button class="layer-down">↓</button>
+                        <button class="layer-delete">×</button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // Add event listeners for layer controls
+    layersPanel.querySelectorAll('.layer-item').forEach((layer, index) => {
+        const shape = canvas.children[index];
+        
+        // Layer name
+        const nameInput = layer.querySelector('.layer-name');
+        nameInput.addEventListener('change', function() {
+            shape.dataset.layerName = this.value;
+        });
+
+        // Layer visibility
+        const visibleCheckbox = layer.querySelector('.layer-visible');
+        visibleCheckbox.addEventListener('change', function() {
+            shape.style.display = this.checked ? '' : 'none';
+        });
+
+        // Layer lock
+        const lockCheckbox = layer.querySelector('.layer-locked');
+        lockCheckbox.addEventListener('change', function() {
+            shape.dataset.locked = this.checked;
+            if (this.checked) {
+                shape.style.pointerEvents = 'none';
+            } else {
+                shape.style.pointerEvents = '';
+            }
+        });
+
+        // Layer reordering
+        const upButton = layer.querySelector('.layer-up');
+        const downButton = layer.querySelector('.layer-down');
+        
+        upButton.addEventListener('click', () => {
+            if (index > 0) {
+                canvas.insertBefore(shape, canvas.children[index - 1]);
+                updateLayers();
+            }
+        });
+
+        downButton.addEventListener('click', () => {
+            if (index < canvas.children.length - 1) {
+                canvas.insertBefore(shape, canvas.children[index + 1].nextSibling);
+                updateLayers();
+            }
+        });
+
+        // Layer deletion
+        const deleteButton = layer.querySelector('.layer-delete');
+        deleteButton.addEventListener('click', () => {
+            shape.remove();
+            updateLayers();
+        });
+
+        // Drag and drop
+        layer.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', index);
+        });
+
+        layer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        layer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const toIndex = index;
+            
+            if (fromIndex !== toIndex) {
+                const shape = canvas.children[fromIndex];
+                const targetShape = canvas.children[toIndex];
+                canvas.insertBefore(shape, targetShape);
+                updateLayers();
+            }
+        });
+    });
+
+    // Minimize layers panel
+    const minimizeButton = layersPanel.querySelector('.minimize-layers');
+    minimizeButton.addEventListener('click', () => {
+        const content = layersPanel.querySelector('.layers-content');
+        content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        minimizeButton.textContent = content.style.display === 'none' ? '+' : '−';
+    });
+
+    // Hide layers panel
+    const hideButton = layersPanel.querySelector('.hide-layers');
+    hideButton.addEventListener('click', () => {
+        layersPanel.style.display = layersPanel.style.display === 'none' ? 'block' : 'none';
+    });
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Text color picker
+    textColorPicker.addEventListener('input', function() {
+        if (selectedShape && selectedShape.textContent) {
+            selectedShape.style.color = this.value;
+        }
+    });
+
+    // Rectangle color picker
+    rectColorPicker.addEventListener('input', function() {
+        if (selectedShape) {
+            selectedShape.style.backgroundColor = this.value;
+        }
+    });
+
+    // Corner radius
+    cornerRadius.addEventListener('input', function() {
+        if (selectedShape) {
+            selectedShape.style.borderRadius = `${this.value}px`;
+        }
+    });
+
+    // Text size
+    textSizeInput.addEventListener('input', function() {
+        if (selectedShape && selectedShape.textContent) {
+            selectedShape.style.fontSize = `${this.value}px`;
+        }
+    });
+
+    // Font family
+    fontFamilySelect.addEventListener('change', function() {
+        if (selectedShape && selectedShape.textContent) {
+            selectedShape.style.fontFamily = this.value;
+        }
+    });
+
+    // Export button
+    exportButton.addEventListener('click', async () => {
+        if (exportFormat.value === 'jpg' || exportFormat.value === 'png') {
+            try {
+                const canvasElement = document.getElementById('canvas');
+                const canvasImg = await html2canvas(canvasElement);
+                const link = document.createElement('a');
+                link.download = `drawing.${exportFormat.value}`;
+                link.href = canvasImg.toDataURL(`image/${exportFormat.value}`);
+                link.click();
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export image. Please try again.');
+            }
+        } else {
+            exportDrawing();
+        }
+    });
+
+    // Rename import button
+    importFile.setAttribute('title', 'Place');
+});
+
+// Add back the essential functions
 function addTextToRectangle() {
     if (selectedShape && selectedShape.classList.contains('shape')) {
         selectedShape.textContent = 'Text';
         selectedShape.style.display = 'flex';
         selectedShape.style.alignItems = 'center';
         selectedShape.style.justifyContent = 'center';
-        selectedShape.style.fontSize = '16px';
-        selectedShape.style.color = colorPicker.value;
+        selectedShape.style.fontSize = textSizeInput.value + 'px';
+        selectedShape.style.color = textColorPicker.value;
+        selectedShape.style.fontFamily = fontFamilySelect.value;
     } else {
         createShape('text');
     }
 }
 
-function updateTextStyle() {
-    if (selectedShape && selectedShape.classList.contains('shape')) {
-        selectedShape.style.fontSize = `${textSizeInput.value}px`;
-        selectedShape.style.color = colorPicker.value;
-    }
-}
-
-// Update the addResizeHandles function
 function addResizeHandles(shape) {
     const handles = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
@@ -108,7 +360,6 @@ function addResizeHandles(shape) {
         handle.className = `resize-handle ${position}`;
         shape.appendChild(handle);
 
-        // Common handler function
         const startResize = (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -166,28 +417,26 @@ function addResizeHandles(shape) {
             }
         };
 
-        // Add both mouse and touch listeners
         handle.addEventListener('mousedown', startResize);
         handle.addEventListener('touchstart', startResize, { passive: false });
     });
 }
+
 function addCornerRadiusHandles(shape) {
     const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-    const handleSize = 14; // Size of the handle in pixels
+    const handleSize = 14;
 
     corners.forEach((corner) => {
         const handle = document.createElement('div');
         handle.className = `corner-radius-handle ${corner}`;
-        
-        // Position handles inside the rectangle
         handle.style.position = 'absolute';
         handle.style.width = `${handleSize}px`;
         handle.style.height = `${handleSize}px`;
         handle.style.backgroundColor = '#fff';
         handle.style.border = '1px solid #000';
+        handle.style.borderRadius = '50%';
         handle.style.cursor = 'pointer';
 
-        // Position based on corner
         switch(corner) {
             case 'top-left':
                 handle.style.left = '0';
@@ -253,7 +502,6 @@ function removeCornerRadiusHandles(shape) {
     handles.forEach((handle) => handle.remove());
 }
 
-// Update the addRotationHandle function
 function addRotationHandle(shape) {
     const handle = document.createElement('div');
     handle.className = 'rotation-handle';
@@ -265,7 +513,6 @@ function addRotationHandle(shape) {
 
         const isTouch = e.type === 'touchstart';
         const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-        const shapeCenterX = shape.offsetLeft + shape.offsetWidth / 2;
         let lastX = clientX;
         let currentRotation = getRotationAngle(shape);
 
@@ -298,7 +545,6 @@ function addRotationHandle(shape) {
         }
     };
 
-    // Add both mouse and touch listeners
     handle.addEventListener('mousedown', startRotate);
     handle.addEventListener('touchstart', startRotate, { passive: false });
 }
@@ -312,55 +558,65 @@ function removeRotationHandle(shape) {
     const handle = shape.querySelector('.rotation-handle');
     if (handle) handle.remove();
 }
-
-// Update the dragElement function
 function dragElement(element) {
-    let posX = 0, posY = 0, startX = 0, startY = 0;
+    let isDragging = false;
+    let startX = 0, startY = 0;
 
     const startDrag = (e) => {
+        // Do not start dragging from handles
+        if (
+            e.target.classList.contains('resize-handle') ||
+            e.target.classList.contains('rotation-handle') ||
+            e.target.classList.contains('corner-radius-handle')
+        ) return;
+
         e.preventDefault();
-        const isTouch = e.type === 'touchstart';
-        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-        
-        startX = clientX;
-        startY = clientY;
+        isDragging = true;
 
-        const moveHandler = (moveEvent) => {
-            const moveX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
-            const moveY = isTouch ? moveEvent.touches[0].clientY : moveEvent.clientY;
-            
-            posX = moveX - startX;
-            posY = moveY - startY;
-            startX = moveX;
-            startY = moveY;
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        startX = clientX - element.offsetLeft;
+        startY = clientY - element.offsetTop;
 
-            element.style.top = (element.offsetTop + posY) + 'px';
-            element.style.left = (element.offsetLeft + posX) + 'px';
-        };
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchmove', doDrag, { passive: false });
+        document.addEventListener('touchend', stopDrag);
+    };
 
-        const endHandler = () => {
-            if (isTouch) {
-                document.removeEventListener('touchmove', moveHandler);
-                document.removeEventListener('touchend', endHandler);
-            } else {
-                document.removeEventListener('mousemove', moveHandler);
-                document.removeEventListener('mouseup', endHandler);
-            }
-        };
+    const doDrag = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
 
-        if (isTouch) {
-            document.addEventListener('touchmove', moveHandler, { passive: false });
-            document.addEventListener('touchend', endHandler);
-        } else {
-            document.addEventListener('mousemove', moveHandler);
-            document.addEventListener('mouseup', endHandler);
-        }
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+        const newX = clientX - startX;
+        const newY = clientY - startY;
+
+        // Clamp to canvas
+        const maxX = canvas.clientWidth - element.offsetWidth;
+        const maxY = canvas.clientHeight - element.offsetHeight;
+
+        element.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+        element.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+    };
+
+    const stopDrag = () => {
+        isDragging = false;
+        document.removeEventListener('mousemove', doDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchmove', doDrag);
+        document.removeEventListener('touchend', stopDrag);
     };
 
     element.addEventListener('mousedown', startDrag);
     element.addEventListener('touchstart', startDrag, { passive: false });
 }
+
+
+
+
 function getRotationAngle(element) {
     const transform = getComputedStyle(element).transform;
     if (transform === 'none') return 0;
@@ -370,63 +626,7 @@ function getRotationAngle(element) {
     return Math.round(Math.atan2(b, a) * (180 / Math.PI));
 }
 
-// Update updateLayers function
-function updateLayers() {
-    layersPanel.innerHTML = '<h3>Layers</h3>';
-    const shapes = Array.from(canvas.children);
-    
-    shapes.forEach((shape, index) => {
-        const layer = document.createElement('div');
-        layer.className = 'layer-item';
-        layer.innerHTML = `
-            <input type="text" class="layer-name" value="Layer ${index + 1}">
-            <div class="layer-controls">
-                <button class="layer-up">↑</button>
-                <button class="layer-down">↓</button>
-                ${createDeleteButton(shape).outerHTML}
-            </div>
-        `;
-
-        const nameInput = layer.querySelector('.layer-name');
-        const upButton = layer.querySelector('.layer-up');
-        const downButton = layer.querySelector('.layer-down');
-
-        // Rename layer
-        nameInput.addEventListener('change', () => {
-            layer.querySelector('.layer-name').value = nameInput.value;
-        });
-
-        // Move layer up
-        upButton.addEventListener('click', () => {
-            if (index > 0) {
-                canvas.insertBefore(shape, canvas.children[index - 1]);
-                updateLayers();
-            }
-        });
-
-        // Move layer down
-        downButton.addEventListener('click', () => {
-            if (index < shapes.length - 1) {
-                canvas.insertBefore(shape, canvas.children[index + 1].nextSibling);
-                updateLayers();
-            }
-        });
-
-        layersPanel.appendChild(layer);
-    });
-}
-
-function createDeleteButton(shape) {
-    const button = document.createElement('button');
-    button.textContent = 'Delete';
-    button.addEventListener('click', () => {
-        shape.remove();
-        updateLayers();
-    });
-    return button;
-}
-
-// Event listeners
+// Add back the event listeners
 addRectangle.addEventListener('click', () => createShape('rectangle'));
 addText.addEventListener('click', addTextToRectangle);
 
@@ -438,14 +638,28 @@ deleteShape.addEventListener('click', () => {
     }
 });
 
-colorPicker.addEventListener('input', updateTextStyle);
-
-cornerRadius.addEventListener('input', () => {
-    if (selectedShape) {
-        selectedShape.style.borderRadius = cornerRadius.value + 'px';
-    }
+// Add back the image import handler
+importFile.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+        if(file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                if(selectedShape) {
+                    selectedShape.style.backgroundImage = `url(${event.target.result})`;
+                } else {
+                    const imgShape = createShape('image', `Image ${Date.now()}`);
+                    imgShape.style.backgroundImage = `url(${event.target.result})`;
+                    imgShape.style.width = `${canvas.offsetWidth/2}px`;
+                    imgShape.style.height = `${canvas.offsetHeight/2}px`;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 });
 
+// Export drawing function
 function exportDrawing() {
     const htmlContent = `
 <!DOCTYPE html>
@@ -470,6 +684,7 @@ function exportDrawing() {
     link.click();
 }
 
+// Export script function
 function exportScript() {
     return `
         document.querySelectorAll('.shape').forEach(shape => {
@@ -492,148 +707,3 @@ function exportScript() {
         });
     `;
 }
-
-function importDrawing(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(e.target.result, 'text/html');
-        canvas.innerHTML = doc.querySelector('#canvas').innerHTML;
-        updateLayers();
-        canvas.querySelectorAll('.shape').forEach(shape => {
-            // Reattach click listener for selection and handles
-            shape.addEventListener('click', function() {
-                if (selectedShape) {
-                    selectedShape.classList.remove('selected');
-                    removeResizeHandles(selectedShape);
-                    removeRotationHandle(selectedShape);
-                    removeCornerRadiusHandles(selectedShape);
-                }
-                selectedShape = shape;
-                shape.classList.add('selected');
-                if (shape.textContent) {
-                    textContentInput.value = shape.textContent;
-                    textSizeInput.value = parseInt(getComputedStyle(shape).fontSize, 10);
-                }
-                addResizeHandles(shape);
-                addRotationHandle(shape);
-                addCornerRadiusHandles(shape);
-            });
-
-            // Reattach double-click listener for text editing
-            shape.addEventListener('dblclick', function() {
-                if (shape.textContent) {
-                    shape.contentEditable = true;
-                    shape.focus();
-
-                    const onBlur = () => {
-                        shape.contentEditable = false;
-                        textContentInput.value = shape.textContent;
-                        shape.removeEventListener('blur', onBlur);
-                    };
-
-                    shape.addEventListener('blur', onBlur);
-                }
-            });
-
-            // Re-enable dragging functionality
-            dragElement(shape);
-        });
-    };
-    reader.readAsText(file);
-}
-
-function updateRectColor() {
-    if (selectedShape && selectedShape.classList.contains('shape')) {
-        selectedShape.style.backgroundColor = rectColorPicker.value;
-    }
-}
-
-// Add these new handler functions
-function handleTouchSelection(e) {
-    e.preventDefault();
-    handleSelection(e);
-    // Prevent immediate deselection on mobile
-    if (selectedShape) {
-        e.stopPropagation();
-    }
-}
-
-function handleSelection(e) {
-    if (selectedShape) {
-        selectedShape.classList.remove('selected');
-        removeResizeHandles(selectedShape);
-        removeRotationHandle(selectedShape);
-        removeCornerRadiusHandles(selectedShape);
-    }
-    
-    const shape = e.target.closest('.shape');
-    selectedShape = shape;
-    shape.classList.add('selected');
-    
-    if (shape.textContent) {
-        textContentInput.value = shape.textContent;
-        textSizeInput.value = parseInt(getComputedStyle(shape).fontSize, 10);
-    }
-    
-    addResizeHandles(shape);
-    addRotationHandle(shape);
-    addCornerRadiusHandles(shape);
-}
-
-function handleDoubleTap(e) {
-    const currentTime = new Date().getTime();
-    const timeSinceLastTap = currentTime - lastTouchTime;
-    
-    if (timeSinceLastTap < doubleTapThreshold && timeSinceLastTap > 0) {
-        startTextEditing(e);
-        lastTouchTime = 0;
-    } else {
-        lastTouchTime = currentTime;
-    }
-}
-
-function startTextEditing(e) {
-    const shape = e.target.closest('.shape');
-    if (!shape || !shape.textContent) return;
-
-    e.preventDefault();
-    shape.contentEditable = true;
-    
-    // Mobile keyboard activation
-    setTimeout(() => {
-        shape.focus();
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.selectNodeContents(shape);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }, 100);
-
-    // Handle text input changes
-    const finishEditing = () => {
-        shape.contentEditable = false;
-        textContentInput.value = shape.textContent;
-        shape.removeEventListener('blur', finishEditing);
-        shape.removeEventListener('touchend', finishEditingOutside);
-    };
-
-    const finishEditingOutside = (e) => {
-        if (!shape.contains(e.target)) {
-            finishEditing();
-        }
-    };
-
-    shape.addEventListener('blur', finishEditing);
-    document.addEventListener('touchstart', finishEditingOutside);
-    document.addEventListener('click', finishEditingOutside);
-}
-
-exportButton.addEventListener('click', exportDrawing);
-importInput.addEventListener('change', importDrawing);
-rectColorPicker.addEventListener('input', updateRectColor);
-// Add this to bscript.js
-textSizeInput.addEventListener('input', updateTextStyle);
-
