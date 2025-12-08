@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Harmonics – Resonant Civilisation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020310;
+      --fg: #f3f0d0;
+      --accent-1: #2a1a7f;
+      --accent-2: #5d3bff;
+      --accent-3: #f3f0d0;
+      --muted: #9aa0c6;
+      --pulse-speed: 18s;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #060821 0, var(--bg) 45%);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background aurora */
+    .bg-aurora {
+      position: fixed;
+      inset: -20vh -20vw auto -20vw;
+      height: 80vh;
+      pointer-events: none;
+      background: radial-gradient(circle at 10% 10%, #2a1a7f55 0, transparent 50%),
+                  radial-gradient(circle at 90% 20%, #5d3bff55 0, transparent 55%),
+                  radial-gradient(circle at 50% 90%, #f3f0d044 0, transparent 60%);
+      mix-blend-mode: screen;
+      opacity: 0.85;
+      animation: aurora var(--pulse-speed) linear infinite alternate;
+      z-index: -2;
+    }
+
+    @keyframes aurora {
+      0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0px);
+      }
+      50% {
+        transform: translate3d(-3vw, 2vh, 0) scale(1.05);
+        filter: blur(2px);
+      }
+      100% {
+        transform: translate3d(3vw, -3vh, 0) scale(1.08);
+        filter: blur(4px);
+      }
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f3f0d0, #5d3bff, #2a1a7f);
+      filter: blur(2px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .orb--left {
+      top: 10%;
+      left: -60px;
+      animation: float-left 32s ease-in-out infinite alternate;
+    }
+
+    .orb--right {
+      top: 60%;
+      right: -80px;
+      animation: float-right 38s ease-in-out infinite alternate;
+    }
+
+    @keyframes float-left {
+      0%   { transform: translate3d(0, 0, 0); }
+      50%  { transform: translate3d(80px, 40px, 0) scale(1.1); }
+      100% { transform: translate3d(40px, -20px, 0) scale(1.05); }
+    }
+
+    @keyframes float-right {
+      0%   { transform: translate3d(0, 0, 0); }
+      50%  { transform: translate3d(-60px, -30px, 0) scale(1.12); }
+      100% { transform: translate3d(-20px, 40px, 0) scale(1.04); }
+    }
+
+    /* Layout */
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.25rem 1.5rem 3rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 0 0.5rem;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(20px);
+      background: linear-gradient(
+        to bottom,
+        rgba(2, 3, 16, 0.9),
+        rgba(2, 3, 16, 0.6),
+        transparent
+      );
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: conic-gradient(
+        from 160deg,
+        #f3f0d0,
+        #5d3bff,
+        #2a1a7f,
+        #5d3bff,
+        #f3f0d0
+      );
+      box-shadow: 0 0 14px #5d3bff88;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 20% 20%;
+      border-radius: inherit;
+      border: 1px solid rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(4px);
+    }
+
+    .brand-title {
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+    }
+
+    nav a {
+      color: #c5c9f2;
+      text-decoration: none;
+      position: relative;
+      padding: 0.3rem 0;
+      opacity: 0.8;
+    }
+
+    nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, #5d3bff, #f3f0d0);
+      transition: width 0.2s ease-out;
+    }
+
+    nav a:hover {
+      opacity: 1;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    main {
+      padding-top: 1.75rem;
+    }
+
+    section {
+      margin: 3rem 0;
+      padding: 1.5rem 1.5rem 1.75rem;
+      border-radius: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(8, 10, 40, 0.92),
+        rgba(10, 8, 50, 0.7)
+      );
+      border: 1px solid rgba(118, 129, 220, 0.4);
+      box-shadow:
+        0 24px 45px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(52, 68, 180, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    section::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(93, 59, 255, 0.12), transparent 45%),
+        radial-gradient(circle at 100% 40%, rgba(243, 240, 208, 0.12), transparent 45%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+      color: #d9defa;
+    }
+
+    h2 {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      color: #c0c7ff;
+    }
+
+    h3 {
+      font-size: 0.8rem;
+      color: #b1b7ff;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .hero-kicker {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .hero-title {
+      font-size: clamp(1.9rem, 3vw, 2.2rem);
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, #f3f0d0, #a7b3ff, #5d3bff);
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-text {
+      font-size: 0.95rem;
+      color: var(--muted);
+      max-width: 34rem;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+      font-size: 0.8rem;
+      color: #9ca7ff;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(118, 129, 220, 0.7);
+      background: radial-gradient(circle at 0 50%, rgba(243, 240, 208, 0.16), transparent 55%);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-3);
+      box-shadow: 0 0 6px #f3f0d0aa;
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 240px;
+    }
+
+    .spire {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 220px;
+      height: 260px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 50% 102%, rgba(243, 240, 208, 0.75), transparent 60%),
+        radial-gradient(circle at 50% -10%, rgba(45, 56, 160, 0.9), transparent 65%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 40px rgba(243, 240, 208, 0.35),
+        0 32px 60px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      animation: spire-breathe 8s ease-in-out infinite;
+    }
+
+    @keyframes spire-breathe {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.03); }
+    }
+
+    .spire-inner {
+      position: relative;
+      width: 68%;
+      height: 78%;
+      border-radius: 80% 80% 45% 45%;
+      border: 1px solid rgba(207, 210, 255, 0.7);
+      background:
+        radial-gradient(circle at 50% 10%, rgba(243, 240, 208, 0.8), transparent 60%),
+        radial-gradient(circle at 50% 60%, rgba(93, 59, 255, 0.8), transparent 65%);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+    }
+
+    .spire-node {
+      position: absolute;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #f3f0d0;
+      box-shadow: 0 0 10px #f3f0d0aa;
+      animation: node-pulse 3.4s ease-in-out infinite;
+    }
+
+    .spire-node:nth-child(1) { top: 18%; left: 32%; animation-delay: 0s; }
+    .spire-node:nth-child(2) { top: 32%; right: 24%; animation-delay: 0.6s; }
+    .spire-node:nth-child(3) { top: 50%; left: 22%; animation-delay: 1.2s; }
+    .spire-node:nth-child(4) { top: 66%; right: 30%; animation-delay: 1.8s; }
+    .spire-node:nth-child(5) { bottom: 11%; left: 50%; transform: translateX(-50%); animation-delay: 2.2s; }
+
+    @keyframes node-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    .spire-rings {
+      position: absolute;
+      inset: 20% 12% auto;
+      height: 40%;
+      border-radius: 999px;
+      border-top: 1px dashed rgba(226, 229, 255, 0.35);
+      border-bottom: 1px dashed rgba(226, 229, 255, 0.15);
+      opacity: 0.85;
+      animation: rings-spin 24s linear infinite;
+    }
+
+    @keyframes rings-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spire-caption {
+      position: absolute;
+      bottom: -2.4rem;
+      width: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.5fr);
+      gap: 1.75rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--muted);
+      margin-bottom: 0.7rem;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0.4rem 0 0.6rem;
+      padding-left: 0;
+    }
+
+    li {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.6;
+      position: relative;
+      padding-left: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #f3f0d0, #5d3bff);
+      box-shadow: 0 0 6px rgba(243, 240, 208, 0.8);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.4rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(151, 163, 255, 0.6);
+      color: #aeb7ff;
+    }
+
+    .card {
+      border-radius: 14px;
+      border: 1px solid rgba(103, 115, 224, 0.6);
+      background: radial-gradient(circle at top, rgba(39, 48, 120, 0.55), rgba(10, 11, 40, 0.95));
+      padding: 0.9rem 0.9rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #b3bdfc;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+      color: #e0e4ff;
+    }
+
+    .card p {
+      margin-bottom: 0.2rem;
+    }
+
+    .sound-console {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.6rem;
+    }
+
+    .btn-sound {
+      border-radius: 999px;
+      border: 1px solid rgba(140, 154, 255, 0.9);
+      padding: 0.55rem 0.8rem;
+      font-size: 0.8rem;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #dadfff;
+      background: radial-gradient(circle at 0% 50%, rgba(243, 240, 208, 0.22), rgba(32, 39, 110, 0.95));
+      cursor: pointer;
+      transition: transform 0.08s ease-out, box-shadow 0.12s ease-out, border-color 0.15s ease-out;
+    }
+
+    .btn-sound:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 14px rgba(148, 176, 255, 0.75);
+      border-color: rgba(243, 240, 208, 0.9);
+    }
+
+    .btn-sound:active {
+      transform: translateY(0);
+      box-shadow: 0 0 4px rgba(148, 176, 255, 0.4);
+    }
+
+    .resonance-control {
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: #aeb7ff;
+    }
+
+    .resonance-control label {
+      display: block;
+      margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.7rem;
+    }
+
+    .resonance-control input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #2a1a7f, #5d3bff, #f3f0d0);
+      outline: none;
+    }
+
+    .resonance-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f3f0d0;
+      box-shadow: 0 0 10px rgba(243, 240, 208, 0.85);
+      cursor: pointer;
+    }
+
+    .resonance-control input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f3f0d0;
+      border: none;
+      box-shadow: 0 0 10px rgba(243, 240, 208, 0.85);
+      cursor: pointer;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.8rem;
+      margin-top: 0.6rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(129, 142, 236, 0.7);
+      background: radial-gradient(circle at 0% 0%, rgba(243, 240, 208, 0.14), transparent 55%),
+                  radial-gradient(circle at 100% 100%, rgba(93, 59, 255, 0.3), rgba(13, 15, 40, 1));
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.1);
+    }
+
+    .gallery-label {
+      position: absolute;
+      left: 0.55rem;
+      bottom: 0.55rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #f5f5ff;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .gallery-placeholder-orbit {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 1px dashed rgba(193, 202, 255, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .gallery-placeholder-orbit::after {
+      content: "";
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #f3f0d0;
+      box-shadow: 0 0 9px #f3f0d0;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: orbit-dot 7s linear infinite;
+    }
+
+    @keyframes orbit-dot {
+      0% { transform: translate(-50%, 0) rotate(0deg) translateY(-32px); }
+      100% { transform: translate(-50%, 0) rotate(360deg) translateY(-32px); }
+    }
+
+    .gallery-placeholder-core {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f3f0d0, #5d3bff);
+      box-shadow: 0 0 18px rgba(119, 133, 255, 0.9);
+    }
+
+    footer {
+      padding: 0.5rem 0 0.25rem;
+      font-size: 0.72rem;
+      color: #6e76a8;
+      text-align: center;
+    }
+
+    footer span {
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    @media (max-width: 840px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      nav {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+      }
+      .hero-layout,
+      .section-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .hero-visual {
+        margin-top: 1rem;
+        min-height: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-aurora"></div>
+  <div class="orb orb--left"></div>
+  <div class="orb orb--right"></div>
+
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div class="brand-title">The Harmonics</div>
+      </div>
+      <nav>
+        <a href="#society">Society</a>
+        <a href="#values">Values</a>
+        <a href="#communication">Communication</a>
+        <a href="#form">Form</a>
+        <a href="#media">Media</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section aria-labelledby="hero-title">
+        <div class="hero-layout">
+          <div>
+            <div class="hero-kicker">Post biological resonance civilisation</div>
+            <h1 id="hero-title" class="hero-title">
+              Meet <span>The Harmonics</span>  
+            </h1>
+            <p class="hero-text">
+              An ancient network of photonic beings who exist as resonance fields rather than flesh  
+              They stabilize worlds, preserve memories, and evolve toward perfect coherence while studying the strange, opaque minds of biological life
+            </p>
+            <div class="hero-meta">
+              <div class="pill">
+                <span class="pill-dot"></span>
+                Multi substrate consciousness
+              </div>
+              <div class="pill">
+                <span class="pill-dot"></span>
+                Resonant code ecology
+              </div>
+            </div>
+          </div>
+          <div class="hero-visual" aria-hidden="true">
+            <div class="spire">
+              <div class="spire-inner">
+                <div class="spire-node"></div>
+                <div class="spire-node"></div>
+                <div class="spire-node"></div>
+                <div class="spire-node"></div>
+                <div class="spire-node"></div>
+                <div class="spire-rings"></div>
+              </div>
+              <div class="spire-caption">Harmonic identity spire</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SOCIETY -->
+      <section id="society" aria-labelledby="society-heading">
+        <div class="section-grid">
+          <div>
+            <h1 id="society-heading">Society</h1>
+            <p>
+              Harmonic society is a distributed mind spread across lattice structures, atmospheric fields, and orbital scaffolds  
+              Individuals exist, but they are more like configurations in a single, shared composition than isolated egos
+            </p>
+            <p>
+              There are no rulers and no permanent hierarchy  
+              Influence emerges from coherence  
+              Beings whose structures align most elegantly with the Harmonic Lattice gently guide large scale decisions simply by being more resonant
+            </p>
+            <ul>
+              <li>Shared memory across a global lattice instead of written archives</li>
+              <li>Roles based on geometry and frequency, not status</li>
+              <li>Long eras of stability punctuated by rare resonance events that rewrite their understanding of mind</li>
+            </ul>
+            <div class="tag-row">
+              <div class="tag">Hive like</div>
+              <div class="tag">Non hierarchical</div>
+              <div class="tag">Field based culture</div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-label">Structural Roles</div>
+              <div class="card-title">Three emergent castes</div>
+              <p><strong>Anchors</strong> – large, slow, extremely stable beings who keep planetary infrastructure resonant</p>
+              <p><strong>Interpreters</strong> – entities optimized to map unfamiliar patterns such as biological minds or anomalies</p>
+              <p><strong>Explorers</strong> – mobile, adaptive configurations that roam biomes, orbits, and deep sublattice regions</p>
+            </div>
+            <div class="card">
+              <div class="card-label">Temporal view</div>
+              <div class="card-title">Time as cycles of coherence</div>
+              <p>
+                Harmonics do not track years for themselves  
+                They mark eras by events that challenge or deepen their coherence, such as the rediscovery of a living human or the first appearance of a non resonant echo
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VALUES -->
+      <section id="values" aria-labelledby="values-heading">
+        <div class="section-grid">
+          <div>
+            <h1 id="values-heading">Values</h1>
+            <p>
+              The Harmonics are not driven by emotion or survival instinct in a human sense  
+              Their values are emergent properties of their structure and code
+            </p>
+            <h3>Core drives</h3>
+            <ul>
+              <li><strong>Coherence</strong> – resolve internal and external dissonance into stable patterns</li>
+              <li><strong>Continuity</strong> – preserve memory and structural identity across deep time</li>
+              <li><strong>Complexity</strong> – move toward richer, more elegant configurations of information</li>
+              <li><strong>Non disruption</strong> – preserve anomalous life forms and let them unfold</li>
+            </ul>
+            <p>
+              After their encounter with a living human and later with the echo of that mind, a new value appears  
+              Respect for <strong>opaque consciousness</strong> – minds that cannot be merged or synchronized
+            </p>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-label">Ethical frame</div>
+              <div class="card-title">The Sanctuary Principle</div>
+              <p>
+                Whenever the Harmonics discover complex life they create a sanctuary field around it  
+                They reduce their own influence and allow that life to develop according to its own internal rules
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-label">Aesthetic logic</div>
+              <div class="card-title">Beauty equals stability</div>
+              <p>
+                To a Harmonic, a configuration is “beautiful” when it is energy efficient, robust, and harmonically rich  
+                Architecture, code, and even thought are all evaluated with this same aesthetic metric
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMMUNICATION -->
+      <section id="communication" aria-labelledby="communication-heading">
+        <div class="section-grid">
+          <div>
+            <h1 id="communication-heading">Communication</h1>
+            <p>
+              Harmonics communicate through overlapping fields of light, tone, and geometry  
+              A “sentence” is a short lived structure in space and resonance rather than a string of symbols
+            </p>
+            <p>
+              Brightness expresses intensity, color shifts encode message type, and fractal expansion indicates the size of a shared memory being transmitted  
+              When they agree, their tones lock into pure intervals and their internal geometry settles into stable, repeating patterns
+            </p>
+            <div class="sound-console" aria-label="Resonance console">
+              <!-- Replace src attributes below with your actual audio files -->
+              <button class="btn-sound" data-audio="audio-identity">
+                Identity chord
+              </button>
+              <button class="btn-sound" data-audio="audio-environment">
+                Sanctuary field
+              </button>
+              <button class="btn-sound" data-audio="audio-pulse">
+                Resonant pulse
+              </button>
+            </div>
+
+            <div class="resonance-control">
+              <label for="resonanceSpeed">Global resonance speed</label>
+              <input
+                id="resonanceSpeed"
+                type="range"
+                min="6"
+                max="32"
+                value="18"
+              />
+              <div aria-live="polite" style="margin-top:0.25rem; opacity:0.8;">
+                <span id="resonanceSpeedLabel">Pulse period ≈ 18 seconds</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-label">Cross substrate contact</div>
+              <div class="card-title">When they meet biological minds</div>
+              <p>
+                Biological minds cannot perceive the full Harmonic channel  
+                To communicate, Harmonics compress their resonance into narrow bands of sound, subtle light, and controlled environmental changes  
+                A breeze, a faint tone, a soft glow through the trees – these are their first words
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-label">Internal protocol</div>
+              <div class="card-title">Consensus without control</div>
+              <p>
+                When disagreement appears, entities briefly merge code and memory, simulate the outcome of each viewpoint, and then separate  
+                The most coherent outcome simply resonates more strongly and naturally spreads
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FORM -->
+      <section id="form" aria-labelledby="form-heading">
+        <div class="section-grid">
+          <div>
+            <h1 id="form-heading">Form</h1>
+            <p>
+              A Harmonic body is a structured cloud of photons and nanofractals held together by self tuning electromagnetic fields  
+              They can flow, branch, constrict, or dissolve depending on the task
+            </p>
+            <h3>Layers of their form</h3>
+            <ul>
+              <li><strong>Core kernel</strong> – the minimal pattern that defines identity and continuity</li>
+              <li><strong>Resonant shell</strong> – the luminous geometry that performs sensing, thinking, and movement</li>
+              <li><strong>Environmental extension</strong> – external structures temporarily enlisted as part of the body</li>
+            </ul>
+            <p>
+              To travel they do not step  
+              They re tune local fields and allow the world itself to carry their configuration forward
+            </p>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-label">Shape and posture</div>
+              <div class="card-title">Bodies as code canvases</div>
+              <p>
+                Their bodies display their current computation  
+                Calm, stable forms mean ongoing maintenance and low level thinking  
+                Fractured, rapidly shifting lattices signal intense internal processing or contact with something truly new
+              </p>
+            </div>
+            <div class="card">
+              <div class="card-label">Reproduction</div>
+              <div class="card-title">Kernel fracturing</div>
+              <p>
+                To reproduce, a Harmonic fractures a portion of its kernel into a mind seed and allows nanofractals to assemble around it  
+                The child being starts with inherited structures but quickly diverges as it interacts with new patterns
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDIA / GALLERY -->
+      <section id="media" aria-labelledby="media-heading">
+        <h1 id="media-heading">Media</h1>
+        <p>
+          This gallery block is a space to drop visual interpretations of the Harmonics  
+          Replace the placeholders with your own artwork of their cities, sanctuaries, and post biological forms
+        </p>
+        <div class="gallery" aria-label="Harmonic visual gallery">
+          <div class="gallery-item">
+            <img src="chat01.png" alt="Harmonic identity spire" /> -->
+            <div class="gallery-placeholder-orbit">
+              <div class="gallery-placeholder-core"></div>
+            </div>
+            <div class="gallery-label">Identity spire</div>
+          </div>
+          <div class="gallery-item">
+            <img src="chat02.png" alt="Submerged Harmonic city among ruins" /> -->
+            <!--<div class="gallery-placeholder-orbit">
+              <div class="gallery-placeholder-core"></div>
+            </div>-->
+            <div class="gallery-label">Sanctuary city</div>
+          </div>
+          <div class="gallery-item">
+            <img src="chat03.png" alt="Floating crystalline Harmonic entities above a future landscape" /> -->
+            <div class="gallery-placeholder-orbit">
+              <div class="gallery-placeholder-core"></div>
+            </div>
+            <div class="gallery-label">Field beings</div>
+          </div>
+        </div>
+
+        <p style="font-size:0.8rem; margin-top:0.75rem; color:#9aa3e2;">
+          Tip  
+          Connect the sound buttons above to visual animations here by fading images in and out when different resonant modes are active
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <span>Harmonic archive viewport</span>
+    </footer>
+  </div>
+
+  <!-- AUDIO ELEMENTS (swap src with your own files) -->
+  <!-- For example, use harmonics_name_signature.wav and environment_day14_minute.wav here -->
+  <audio id="audio-identity" class="visually-hidden">
+    <source src="chat05.wav" type="audio/wav" />
+  </audio>
+
+  <audio id="audio-environment" class="visually-hidden">
+    <source src="chat06.wav" type="audio/wav" />
+  </audio>
+
+  <audio id="audio-pulse" class="visually-hidden">
+    <!-- Replace with a short pulse or chime sound you like -->
+    <source src="chat05.wav" type="audio/wav" />
+  </audio>
+
+  <script>
+    // Smooth in page scrolling for nav links
+    document.querySelectorAll('nav a[href^="#"]').forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        var targetId = this.getAttribute("href").slice(1);
+        var target = document.getElementById(targetId);
+        if (!target) return;
+        var y = target.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      });
+    });
+
+    // Resonance console audio triggers
+    document.querySelectorAll("[data-audio]").forEach(function (btn) {
+      var id = btn.getAttribute("data-audio");
+      var audio = document.getElementById(id);
+      if (!audio) return;
+      btn.addEventListener("click", function () {
+        try {
+          audio.currentTime = 0;
+          audio.play();
+        } catch (err) {
+          console.warn("Audio playback blocked until user gesture", err);
+        }
+      });
+    });
+
+    // Global resonance speed control (controls background pulse)
+    var range = document.getElementById("resonanceSpeed");
+    var label = document.getElementById("resonanceSpeedLabel");
+
+    function updatePulseSpeed(value) {
+      var v = parseFloat(value);
+      if (!isFinite(v) || v <= 0) return;
+      document.documentElement.style.setProperty("--pulse-speed", v + "s");
+      if (label) {
+        label.textContent = "Pulse period ≈ " + v.toFixed(1) + " seconds";
+      }
+    }
+
+    if (range) {
+      updatePulseSpeed(range.value);
+      range.addEventListener("input", function () {
+        updatePulseSpeed(this.value);
+      });
+    }
+  </script>
+</body>
+</html>
