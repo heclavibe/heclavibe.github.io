@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Center for ADHD Students – Santa Monica College</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="The Center for ADHD Students at Santa Monica College provides academic support, coaching, and community for neurodivergent students."
+  />
+
+  <style>
+    :root {
+      --blue: #005f99;
+      --blue-light: #e6f4ff;
+      --yellow: #ffd868;
+      --gray-100: #f7f7f7;
+      --gray-300: #dddddd;
+      --gray-700: #444444;
+      --gray-900: #222222;
+      --radius-lg: 16px;
+      --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      color: var(--gray-900);
+      line-height: 1.6;
+      background: #ffffff;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Layout helpers */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    section {
+      padding: 3.5rem 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: var(--blue-light);
+      color: var(--blue);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: 0;
+      background: #000;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      z-index: 100;
+    }
+
+    .skip-link:focus {
+      left: 0.5rem;
+      top: 0.5rem;
+    }
+
+    /* Header / nav */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid #eeeeee;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      gap: 1rem;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #ffe89a, #ffb347);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #1a1a1a;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      padding: 0.25rem 0;
+    }
+
+    .nav-cta {
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      border: none;
+      background: var(--blue);
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+      white-space: nowrap;
+    }
+
+    .nav-cta:hover,
+    .nav-cta:focus {
+      filter: brightness(1.05);
+      text-decoration: none;
+    }
+
+    @media (max-width: 720px) {
+      .nav {
+        flex-wrap: wrap;
+      }
+
+      .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+    }
+
+    /* Hero */
+    .hero {
+      background: radial-gradient(circle at top left, #f3f7ff, #ffffff);
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: center;
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+    }
+
+    @media (max-width: 840px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+    }
+
+    .hero-subtitle {
+      font-size: 1.02rem;
+      color: var(--gray-700);
+      max-width: 34rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn-primary,
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.7rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.04s ease-out, box-shadow 0.04s ease-out,
+        background 0.08s ease-out;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #ffffff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      text-decoration: none;
+    }
+
+    .btn-ghost {
+      background: #ffffff;
+      border-color: var(--gray-300);
+      color: var(--gray-900);
+    }
+
+    .btn-ghost:hover,
+    .btn-ghost:focus {
+      background: var(--gray-100);
+      text-decoration: none;
+    }
+
+    .hero-note {
+      font-size: 0.85rem;
+      color: var(--gray-700);
+      max-width: 32rem;
+    }
+
+    .hero-note strong {
+      font-weight: 600;
+    }
+
+    .hero-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.5rem 1.25rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid #f0f0f0;
+    }
+
+    .hero-card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .hero-pill {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.11em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .hero-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1rem;
+      font-size: 0.9rem;
+    }
+
+    .hero-list li {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.55rem;
+      align-items: flex-start;
+    }
+
+    .hero-bullet {
+      margin-top: 0.35rem;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--yellow);
+      flex-shrink: 0;
+    }
+
+    .hero-meta {
+      font-size: 0.8rem;
+      color: var(--gray-700);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* Sections: cards / grids */
+    .section-intro {
+      max-width: 38rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-intro p {
+      margin: 0.25rem 0 0;
+      color: var(--gray-700);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px solid #eeeeee;
+      padding: 1.2rem 1.25rem 1.25rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .card-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--blue);
+      margin-bottom: 0.4rem;
+    }
+
+    .card p {
+      margin: 0.35rem 0;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    .card ul {
+      padding-left: 1.1rem;
+      margin: 0.2rem 0;
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    /* Timeline / steps */
+    .steps {
+      border-left: 2px solid var(--blue-light);
+      margin: 1rem 0 0;
+      padding-left: 1rem;
+    }
+
+    .step {
+      margin-bottom: 1.2rem;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .step-body {
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    /* Testimonials */
+    .testimonials {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .testimonials {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quote-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.6rem;
+      border: 1px solid #eeeeee;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+    }
+
+    .quote-card::before {
+      content: "“";
+      position: absolute;
+      font-size: 4rem;
+      opacity: 0.06;
+      top: 0.2rem;
+      left: 0.5rem;
+    }
+
+    .quote-text {
+      font-size: 0.98rem;
+      color: var(--gray-900);
+      margin-bottom: 0.6rem;
+    }
+
+    .quote-author {
+      font-size: 0.9rem;
+      color: var(--gray-700);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      margin-top: 0.8rem;
+    }
+
+    .chip {
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid var(--gray-300);
+      background: #fff;
+    }
+
+    /* Resources list */
+    .resource-list {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 0;
+      font-size: 0.9rem;
+    }
+
+    .resource-list li {
+      padding: 0.55rem 0;
+      border-bottom: 1px dashed #e2e2e2;
+    }
+
+    .resource-meta {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--gray-700);
+      margin-top: 0.2rem;
+    }
+
+    /* Contact / accessibility */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 840px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .contact-card {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 1.5rem 1.25rem;
+      border: 1px solid #eeeeee;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .contact-grid label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .contact-grid input,
+    .contact-grid textarea,
+    .contact-grid select {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid #d8d8d8;
+      padding: 0.55rem 0.85rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 0.8rem;
+    }
+
+    .contact-grid textarea {
+      min-height: 120px;
+      border-radius: 16px;
+      resize: vertical;
+    }
+
+    .contact-grid small {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--gray-700);
+      margin-top: -0.5rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .accessibility-box {
+      background: var(--gray-100);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.4rem;
+      border: 1px solid #e4e4e4;
+      font-size: 0.9rem;
+      color: var(--gray-800);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid #eeeeee;
+      background: #fafafa;
+      padding: 1.5rem 0;
+      font-size: 0.8rem;
+      color: var(--gray-700);
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .footer-nav {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header>
+    <nav class="nav" aria-label="Main">
+      <a href="#top" class="nav-logo">
+        <span class="nav-logo-icon" aria-hidden="true">AD</span>
+        <span>Center for ADHD Students · SMC</span>
+      </a>
+      <div class="nav-links">
+        <a href="#services">Services</a>
+        <a href="#workshops">Workshops</a>
+        <a href="#resources">Resources</a>
+        <a href="#contact">Contact</a>
+        <a href="#accessibility">Accessibility</a>
+        <a href="#contact" class="nav-cta">Book an intake</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="container hero-grid">
+        <div>
+          <div class="tag">Santa Monica College · Student Services</div>
+          <h1>Center for ADHD Students</h1>
+          <p class="hero-subtitle">
+            A calm, structured space on campus where neurodivergent students can get coaching, academic support, and
+            community designed for the way their brains actually work
+          </p>
+
+          <div class="hero-buttons">
+            <a href="#contact" class="btn-primary">Schedule a 1:1 intake</a>
+            <a href="#services" class="btn-ghost">Explore services</a>
+          </div>
+
+          <p class="hero-note">
+            <strong>Who we support:</strong> SMC students who identify as having ADHD or related executive functioning
+            challenges—diagnosed or self-identified, credit and non-credit
+          </p>
+        </div>
+
+        <aside class="hero-card" aria-label="Today at the center">
+          <div class="hero-card-title">
+            <div>
+              <div class="hero-pill">Today at the Center</div>
+              <strong>Drop-in focus lab · 1–4 PM</strong>
+            </div>
+            <span aria-hidden="true">📚</span>
+          </div>
+          <ul class="hero-list">
+            <li>
+              <span class="hero-bullet"></span>
+              <div>Quiet + low-sensory room with timers, white-noise, and fidget tools</div>
+            </li>
+            <li>
+              <span class="hero-bullet"></span>
+              <div>Staff coach available for 15-min planning check-ins</div>
+            </li>
+            <li>
+              <span class="hero-bullet"></span>
+              <div>Bring any assignment: reading, writing, math, Canvas, or planning</div>
+            </li>
+          </ul>
+          <div class="hero-meta">
+            <span><strong>Location:</strong> Student Services Building, 2nd floor, Room 210</span>
+            <span><strong>Cost:</strong> Free for all enrolled SMC students</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section id="services">
+      <div class="container">
+        <div class="section-intro">
+          <div class="tag">What we offer</div>
+          <h2>Support designed for ADHD brains</h2>
+          <p>
+            You don’t have to “just try harder.” We focus on building systems, habits, and environments that work with
+            your attention style, not against it
+          </p>
+        </div>
+
+        <div class="grid-3" aria-label="Core services">
+          <article class="card">
+            <div class="card-tag">1:1 Coaching</div>
+            <h3>Academic & executive functioning coaching</h3>
+            <p>Meet weekly or bi-weekly with a trained coach to work on</p>
+            <ul>
+              <li>Planning, time management, and breaking tasks into steps</li>
+              <li>Navigating Canvas, syllabi, and assignment demands</li>
+              <li>Tools for motivation, overwhelm, and perfectionism</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Study spaces</div>
+            <h3>Structured focus labs</h3>
+            <p>Come study with people who get it</p>
+            <ul>
+              <li>Timer-based work sprints and built-in breaks</li>
+              <li>Noise options: quiet, low-music, or headphones-only zones</li>
+              <li>Drop-in support from staff during posted hours</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-tag">Advocacy</div>
+            <h3>Navigation & accommodations support</h3>
+            <p>We can help you:</p>
+            <ul>
+              <li>Connect with the Center for Students with Disabilities</li>
+              <li>Prepare to talk with instructors about your learning needs</li>
+              <li>Find campus and community mental health resources</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Workshops -->
+    <section id="workshops">
+      <div class="container">
+        <div class="section-intro">
+          <div class="tag">Workshops & groups</div>
+          <h2>Learn in low-pressure, practical sessions</h2>
+          <p>Short, repeatable workshops that focus on real tools you can use this week, not generic advice</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <h3>Semester Kickoff: Build Your ADHD-Friendly System</h3>
+            <p>Set up a simple, visual system for the whole term</p>
+            <ul>
+              <li>Color-coding and visual calendars that actually get used</li>
+              <li>Creating “minimum viable routines” for busy weeks</li>
+              <li>Digital vs paper tools and how to combine them</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Procrastination & Motivation Lab</h3>
+            <p>Not just “stop waiting till the last minute”</p>
+            <ul>
+              <li>Why ADHD brains chase urgency and interest</li>
+              <li>Body-doubling, deadlines, and accountability partners</li>
+              <li>Compassionate ways to restart after a “crash” week</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>ADHD Community Circles</h3>
+            <p>Student-led groups with a staff facilitator</p>
+            <ul>
+              <li>Swap tools, apps, and study hacks that actually help</li>
+              <li>Talk about stigma, identity, and self-advocacy</li>
+              <li>Optional sharing—listening is participation too</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="steps" aria-label="How to join a workshop">
+          <div class="step">
+            <div class="step-title">How to join</div>
+            <div class="step-body">
+              Check our calendar in the SMC student portal or ask at the front desk for this week’s schedule. Most
+              workshops repeat every 3–4 weeks
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Student Stories & Resources -->
+    <section id="stories">
+      <div class="container testimonials">
+        <div>
+          <div class="section-intro">
+            <div class="tag">Student voices</div>
+            <h2>“I stopped feeling like a ‘bad student’”</h2>
+            <p>Hearing other people with ADHD describe how they learn can change everything</p>
+          </div>
+
+          <div class="quote-card">
+            <p class="quote-text">
+              I used to think I just wasn’t trying hard enough. My coach helped me build a routine that fits how my
+              brain works. Now I break projects into tiny steps, and the focus lab gives me a place to actually do
+              them
+            </p>
+            <p class="quote-author">Second-year SMC student, Graphic Design</p>
+            <div class="chips">
+              <span class="chip">First-gen student</span>
+              <span class="chip">Works 20+ hours</span>
+              <span class="chip">Diagnosed as an adult</span>
+            </div>
+          </div>
+        </div>
+
+        <aside id="resources">
+          <div class="section-intro" style="margin-bottom: 1rem;">
+            <div class="tag">Quick links</div>
+            <h2 style="font-size:1.3rem;">Campus & online resources</h2>
+          </div>
+          <ul class="resource-list">
+            <li>
+              <a href="#!" aria-label="Center for Students with Disabilities (CSD)">Center for Students with Disabilities
+                (CSD)</a>
+              <span class="resource-meta">Official SMC accommodations, documentation guidance, and alternative testing
+                options</span>
+            </li>
+            <li>
+              <a href="#!">SMC Counseling & Psychological Services (CAPS)</a>
+              <span class="resource-meta">Short-term counseling and referrals for long-term ADHD and mental health
+                care</span>
+            </li>
+            <li>
+              <a href="#!">SMC Learning Resource Center</a>
+              <span class="resource-meta">Tutoring, writing support, and study skills workshops for all students</span>
+            </li>
+            <li>
+              <a href="#!">Recommended ADHD-friendly apps & tools</a>
+              <span class="resource-meta">Curated list of planners, timers, note-taking apps, and browser extensions</span>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Contact & Accessibility -->
+    <section id="contact">
+      <div class="container">
+        <div class="section-intro">
+          <div class="tag">Connect with us</div>
+          <h2>Ready to get support?</h2>
+          <p>You can visit us during open hours, email us, or request a 1:1 intake appointment using the form below</p>
+        </div>
+
+        <div class="contact-grid">
+          <div class="contact-card" aria-label="Intake request form">
+            <h3 style="margin-top:0;">Intake request form</h3>
+            <p style="font-size:0.9rem; color:var(--gray-700); margin-top:0.3rem;">
+              This form is for currently enrolled or admitted SMC students. If you’re not sure whether we’re the right
+              fit, you can still reach out and we’ll help you find the right office
+            </p>
+
+            <form>
+              <label for="name">Full name</label>
+              <input id="name" name="name" type="text" autocomplete="name" required />
+
+              <label for="email">SMC email</label>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@student.smc.edu"
+                required />
+
+              <label for="id">Student ID (optional)</label>
+              <input id="id" name="id" type="text" />
+
+              <label for="support">What kind of support are you interested in?</label>
+              <select id="support" name="support">
+                <option value="">Select an option</option>
+                <option value="coaching">1:1 academic / executive functioning coaching</option>
+                <option value="focus-lab">Focus lab & study spaces</option>
+                <option value="workshops">Workshops & groups</option>
+                <option value="accommodations">Help navigating accommodations</option>
+                <option value="other">Not sure / something else</option>
+              </select>
+
+              <label for="message">Anything you’d like us to know ahead of time?</label>
+              <textarea id="message" name="message" rows="4"
+                placeholder="You can share what’s feeling hardest right now, or what you hope will change this semester"></textarea>
+
+              <small>We aim to respond within 2–3 business days during the semester</small>
+
+              <button type="submit" class="btn-primary">Submit request</button>
+            </form>
+          </div>
+
+          <aside id="accessibility" class="accessibility-box">
+            <h3 style="margin-top:0;">Location, hours & accessibility</h3>
+            <p><strong>Location</strong><br />
+              Student Services Building · 2nd floor · Room 210<br />
+              Santa Monica College, Santa Monica, CA
+            </p>
+
+            <p><strong>Hours</strong><br />
+              Monday–Thursday: 9:00 AM – 5:00 PM<br />
+              Friday: 10:00 AM – 2:00 PM<br />
+              Intersession and summer hours may differ
+            </p>
+
+            <p><strong>Contact</strong><br />
+              Email: <a href="mailto:adhdcenter@smc.edu">adhdcenter@smc.edu</a><br />
+              Phone: (310) 555–1234
+            </p>
+
+            <p><strong>Accessibility</strong></p>
+            <ul>
+              <li>Ramp and elevator access to the 2nd floor</li>
+              <li>Low-sensory seating options and dimmable lighting</li>
+              <li>Printed materials available in large type upon request</li>
+              <li>We strive to use plain, student-friendly language in all materials</li>
+            </ul>
+
+            <p style="font-size:0.85rem; margin-top:0.8rem;">
+              If you experience any barriers accessing our services or this website, please contact us so we can make
+              adjustments and connect you with the appropriate SMC office
+            </p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        Center for ADHD Students · Santa Monica College<br />
+        <span aria-hidden="true">©</span> <span id="year"></span> All rights reserved
+      </div>
+      <div class="footer-nav">
+        <a href="#top">Back to top</a>
+        <a href="#accessibility">Accessibility statement</a>
+        <a href="#resources">Resources</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Automatically update year in footer
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
