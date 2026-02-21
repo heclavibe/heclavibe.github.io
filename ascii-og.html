@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HecLAvibe ASCII Art Studio</title>
+  <link rel="stylesheet" href="astyles.css">
+  <link rel="icon" href="favicon.png">
+</head>
+<body>
+  <header>
+    <h1 class="logo"><a href="index.html">Hec<span class="highlight">LA</span>vibe</a> ASCII Draw</h1>
+    <div class="toolbar">
+      <label for="char-picker">Char:</label>
+      <input type="text" id="char-picker" value="*" maxlength="1">
+      <button id="brush-tool" class="active">Brush</button>
+      <button id="eraser-tool">Eraser</button>
+      <button id="export">Export</button>
+    </div>
+  </header>
+  <main>
+    <div id="canvas"></div>
+  </main>
+  <footer>
+    <p><a href="index.html">HecLAvibe</a> ASCII Draw - Create ASCII art easily!</p>
+    <p>&copy; 2025 Hector Torres. All rights reserved.</p>
+  </footer>
+  <script src="ascript.js"></script>
+</body>
+</html>

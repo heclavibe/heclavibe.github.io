@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HecLAvibe ASCII Art Studio</title>
-  <link rel="stylesheet" href="astyles.css">
+  <link rel="stylesheet" href="astyles_updated.css">
   <link rel="icon" href="favicon.png">
 </head>
 <body>
@@ -15,16 +15,68 @@
       <input type="text" id="char-picker" value="*" maxlength="1">
       <button id="brush-tool" class="active">Brush</button>
       <button id="eraser-tool">Eraser</button>
-      <button id="export">Export</button>
+      <button id="export-txt" title="Export ASCII as .txt">Export TXT</button>
+      <button id="export-animation" title="Export animation as HTML/CSS/JS">Export Animation</button>
     </div>
   </header>
+
   <main>
-    <div id="canvas"></div>
+    <div class="workspace">
+      <div id="canvas" aria-label="ASCII grid canvas"></div>
+
+      <section id="animation-panel" aria-label="Animation timeline">
+        <div class="anim-header">
+          <div class="anim-controls-left">
+            <button id="anim-play" class="anim-btn">Play</button>
+            <button id="anim-pause" class="anim-btn" disabled>Pause</button>
+            <button id="anim-stop" class="anim-btn" disabled>Stop</button>
+          </div>
+
+          <div class="anim-controls-right">
+            <button id="anim-add-keyframe" class="anim-btn primary">Add Keyframe</button>
+            <button id="anim-duplicate" class="anim-btn" disabled>Duplicate</button>
+            <button id="anim-delete" class="anim-btn" disabled>Delete</button>
+
+            <label class="anim-field" title="Delay applied to the selected frame">
+              Delay (ms)
+              <input id="anim-delay" type="number" min="10" step="10" value="200">
+            </label>
+
+            <button id="anim-export" class="anim-btn">Export HTML/CSS/JS</button>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-top">
+            <div class="timeline-title">Timeline</div>
+            <div class="timeline-hint">Drag frames to reorder • Click to select</div>
+          </div>
+
+          <div class="timeline-strip" id="timeline-strip" role="list" aria-label="Frames timeline"></div>
+
+          <div class="timeline-bottom">
+            <label class="anim-field">
+              FPS
+              <input id="anim-fps" type="number" min="1" max="60" step="1" value="5">
+            </label>
+
+            <label class="anim-field wide">
+              Scrub
+              <input id="timeline-scrub" type="range" min="0" max="0" value="0" step="1">
+            </label>
+
+            <div class="timeline-meta" id="timeline-meta">No frames yet</div>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
+
   <footer>
     <p><a href="index.html">HecLAvibe</a> ASCII Draw - Create ASCII art easily!</p>
-    <p>&copy; 2025 Hector Torres. All rights reserved.</p>
+    <p>&copy; 2026 Hector Torres. All rights reserved.</p>
   </footer>
-  <script src="ascript.js"></script>
+
+  <script src="ascript_updated.js"></script>
 </body>
 </html>
