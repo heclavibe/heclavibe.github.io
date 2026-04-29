@@ -595,6 +595,12 @@
       object-fit: cover;
       display: block;
       filter: saturate(1.1);
+      opacity: 0.3;
+      transition: opacity 0.6s ease-in-out;
+    }
+
+    .gallery-item img.active {
+      opacity: 1;
     }
 
     .gallery-label {
@@ -958,16 +964,16 @@
             <div class="gallery-label">Identity spire</div>
           </div>
           <div class="gallery-item">
-            <img src="chat02.png" alt="Submerged Harmonic city among ruins" /> -->
-            <!--<div class="gallery-placeholder-orbit">
+            <img src="chat02.png" alt="Submerged Harmonic city among ruins" /> 
+            <div class="gallery-placeholder-orbit">
               <div class="gallery-placeholder-core"></div>
-            </div>-->
+            </div>
             <div class="gallery-label">Sanctuary city</div>
           </div>
           <div class="gallery-item">
             <div class="gallery-placeholder-orbit">
-              <div class="gallery-placeholder-core">            <img src="chat03.png" alt="Floating crystalline Harmonic entities above a future landscape" /> -->
-</div>
+              <div class="gallery-placeholder-core"></div>
+                 <img src="chat03.png" alt="Floating crystalline Harmonic entities above a future landscape" /> 
             </div>
             <div class="gallery-label">Field beings</div>
           </div>
@@ -1013,15 +1019,49 @@
       });
     });
 
-    // Resonance console audio triggers
+    // Map each sound to its corresponding gallery image
+    var soundToImageMap = {
+      "audio-identity": 0,      // Identity chord → Identity spire (first image)
+      "audio-environment": 1,   // Sanctuary field → Sanctuary city (second image)
+      "audio-pulse": 2          // Resonant pulse → Field beings (third image)
+    };
+
+    // Resonance console audio triggers with visual feedback
     document.querySelectorAll("[data-audio]").forEach(function (btn) {
       var id = btn.getAttribute("data-audio");
       var audio = document.getElementById(id);
       if (!audio) return;
+
       btn.addEventListener("click", function () {
         try {
+          // Clear any other active images
+          document.querySelectorAll(".gallery-item img").forEach(function (img) {
+            img.classList.remove("active");
+          });
+
+          // Activate the corresponding gallery image
+          var imageIndex = soundToImageMap[id];
+          if (imageIndex !== undefined) {
+            var galleryImages = document.querySelectorAll(".gallery-item img");
+            if (galleryImages[imageIndex]) {
+              galleryImages[imageIndex].classList.add("active");
+            }
+          }
+
+          // Play the audio
           audio.currentTime = 0;
           audio.play();
+
+          // Fade out the image when audio ends
+          audio.onended = function () {
+            var imageIndex = soundToImageMap[id];
+            if (imageIndex !== undefined) {
+              var galleryImages = document.querySelectorAll(".gallery-item img");
+              if (galleryImages[imageIndex]) {
+                galleryImages[imageIndex].classList.remove("active");
+              }
+            }
+          };
         } catch (err) {
           console.warn("Audio playback blocked until user gesture", err);
         }
