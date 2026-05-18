@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RagXControl.js — Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #1a1612;
+      --paper:  #f5f1eb;
+      --rule:   #c8bfb0;
+      --accent: #c0392b;
+    }
+
+    html { font-size: 17px; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .page { max-width: 1140px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+    .masthead {
+      border-bottom: 2px solid var(--ink);
+      padding: 3rem 0 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .masthead h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.05;
+    }
+    .masthead .tagline {
+      font-size: 1.05rem;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 400;
+      margin-top: 0.5rem;
+    }
+    .masthead .version {
+      display: inline-block;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      padding: 0.15em 0.5em;
+      vertical-align: middle;
+      margin-left: 0.5rem;
+    }
+
+    .demos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 3rem 4rem;
+    }
+
+    .demo-section {
+      border-top: 1px solid var(--rule);
+      padding-top: 1.5rem;
+    }
+    .demo-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .demo-section .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .text-display {
+      background: #fff;
+      border: 1px solid var(--rule);
+      padding: 1.5rem 1.8rem;
+      min-height: 160px;
+    }
+    .text-display p {
+      font-size: 1rem;
+      line-height: 1.72;
+      color: var(--ink);
+      transition: text-align 0.15s;
+    }
+
+    #bp-badge {
+      position: fixed;
+      top: 1rem; right: 1rem;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.3em 0.7em;
+      z-index: 100;
+    }
+
+    .controls {
+      margin-top: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .controls .sep {
+      opacity: 0.3;
+      font-family: monospace;
+      padding: 0 0.2rem;
+    }
+    .btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      border: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      padding: 0.3em 0.75em;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      transition: background 0.12s, color 0.12s;
+      line-height: 1.4;
+    }
+    .btn:hover  { background: var(--ink); color: var(--paper); }
+    .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .ctrl-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.55;
+    }
+
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      background: #2b2520;
+      color: #e8ddd0;
+      padding: 0.9rem 1.1rem;
+      line-height: 1.65;
+      margin-top: 0.8rem;
+      overflow-x: auto;
+      border-left: 3px solid var(--accent);
+      white-space: pre;
+    }
+    .kw  { color: #e88080; }
+    .str { color: #a8d0a0; }
+    .num { color: #f0c080; }
+    .cmt { color: #7a6e68; font-style: italic; }
+
+    /* Shape cards */
+    .shape-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .shape-card {
+      border: 1px solid var(--rule);
+      padding: 0.6rem 0.7rem;
+      cursor: pointer;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+    .shape-card:hover  { border-color: var(--ink); }
+    .shape-card.active { border-color: var(--accent); border-width: 2px; }
+    .shape-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+    .shape-preview { display: flex; flex-direction: column; gap: 4px; }
+    .shape-preview span {
+      display: block; height: 6px;
+      background: var(--ink); border-radius: 1px; opacity: 0.7;
+    }
+
+    /* Full example */
+    .full-example {
+      grid-column: 1 / -1;
+      border-top: 2px solid var(--ink);
+      padding-top: 2rem;
+    }
+    .full-example .text-display { padding: 2rem 2.5rem; }
+    .full-example p + p { margin-top: 1.2em; }
+
+    /* Widow demo — show/hide last-word highlight */
+    .widow-highlight { background: rgba(192,57,43,0.15); border-radius: 2px; }
+
+    @media (max-width: 640px) {
+      .demos { grid-template-columns: 1fr; }
+      .shape-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="bp-badge">desktop</div>
+
+<div class="page">
+  <header class="masthead">
+    <h1>RagXControl<span class="version">v1.0.0</span></h1>
+    <p class="tagline">Fine-grained typographic rag control for the web</p>
+  </header>
+
+  <div class="demos">
+
+    <!-- ── 1. Alignment ─────────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Text Alignment</h2>
+      <span class="label">align: 'left' | 'right' | 'justify' | 'center'</span>
+      <div class="text-display">
+        <p id="align-para">
+          The measure is the length of a line of type. To a reader's eye, long or
+          short lines can be tiring and distracting. Setting a block of text with
+          a good rag creates a pleasing visual rhythm that guides the eye naturally
+          from line to line without interruption or distraction.
+        </p>
+      </div>
+      <div class="controls" id="align-controls">
+        <button class="btn active" onclick="setAlign('left',   this)">left</button>
+        <button class="btn"        onclick="setAlign('right',  this)">right</button>
+        <button class="btn"        onclick="setAlign('justify',this)">justify</button>
+        <button class="btn"        onclick="setAlign('center', this)">center</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({ selector: <span class="str">'p'</span>, align: <span class="str">'justify'</span> });</div>
+    </div>
+
+    <!-- ── 2. Breakpoints ───────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Responsive Breakpoints</h2>
+      <span class="label">maxCharsPerLine per viewport</span>
+      <div class="text-display">
+        <p id="bp-demo" style="max-width:72ch">
+          Resize this window to see how RagXControl constrains the line length
+          differently on mobile, tablet, and desktop viewports. The ideal measure
+          for body text is between 45 and 75 characters — this text dynamically
+          adapts its maximum width using <code>ch</code> units.
+        </p>
+      </div>
+      <div class="controls" id="bp-controls">
+        <span class="ctrl-label">simulate:</span>
+        <button class="btn" onclick="setBpDemo(40, this)">mobile 40ch</button>
+        <button class="btn" onclick="setBpDemo(58, this)">tablet 58ch</button>
+        <button class="btn active" onclick="setBpDemo(72, this)">desktop 72ch</button>
+        <button class="btn" onclick="setBpDemo(9999, this)">none</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({
+  breakpoints: {
+    mobile:  { maxWidth: <span class="num">767</span>,      maxCharsPerLine: <span class="num">40</span> },
+    tablet:  { maxWidth: <span class="num">1023</span>,     maxCharsPerLine: <span class="num">58</span> },
+    desktop: { maxWidth: Infinity, maxCharsPerLine: <span class="num">72</span> }
+  }
+});</div>
+    </div>
+
+    <!-- ── 3. Hyphenation ──────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Hyphenation</h2>
+      <span class="label">Automatic soft-hyphen insertion</span>
+      <div class="text-display">
+        <p id="hyph-para" lang="en" style="hyphens:auto; -webkit-hyphens:auto; max-width:28ch">
+          Extraordinarily long words like pneumonoultramicroscopicsilicovolcanoconiosis and antidisestablishmentarianism can disrupt the rag significantly. RagXControl inserts soft hyphens at computed syllable boundaries, letting the browser break these words elegantly when needed.
+        </p>
+      </div>
+      <div class="controls" id="hyph-controls">
+        <button class="btn active" onclick="setHyph(true, this)">enabled</button>
+        <button class="btn"        onclick="setHyph(false,this)">disabled</button>
+        <span class="sep">|</span>
+        <span class="ctrl-label">narrow container:</span>
+        <button class="btn active" onclick="setHyphWidth('28ch',this)">narrow</button>
+        <button class="btn"        onclick="setHyphWidth('100%',this)">full width</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({
+  hyphenation: {
+    enabled: <span class="kw">true</span>,
+    minWordLength: <span class="num">6</span>,
+    minCharsBeforeBreak: <span class="num">3</span>,
+    minCharsAfterBreak: <span class="num">3</span>
+  }
+});</div>
+    </div>
+
+    <!-- ── 4. Widows & Orphans ─────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Widows &amp; Orphans</h2>
+      <span class="label">Glue final words together with &amp;nbsp;</span>
+      <div class="text-display">
+        <p id="widow-para" style="max-width: 34ch">
+          Without widow control a single short word can end up stranded alone on the last line of a paragraph which looks quite bad.
+        </p>
+      </div>
+      <div id="widow-status" style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-top:0.5rem;color:var(--accent)"></div>
+      <div class="controls" id="widow-controls">
+        <button class="btn active" onclick="setWidow(true,  this)">enabled</button>
+        <button class="btn"        onclick="setWidow(false, this)">disabled</button>
+        <span class="sep">|</span>
+        <span class="ctrl-label">glue last:</span>
+        <button class="btn"        onclick="setWidowN(1,this)">1 word</button>
+        <button class="btn active" onclick="setWidowN(2,this)">2 words</button>
+        <button class="btn"        onclick="setWidowN(3,this)">3 words</button>
+        <button class="btn"        onclick="setWidowN(4,this)">4 words</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({
+  widows: { enabled: <span class="kw">true</span>, minWords: <span class="num">2</span> }
+});</div>
+    </div>
+
+    <!-- ── 5. Rag Shape ────────────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Rag Shape</h2>
+      <span class="label">shape: natural | flat | wave | triangle | ramp | staircase</span>
+      <div class="shape-grid" id="shape-cards">
+        <div class="shape-card active" data-shape="natural" onclick="pickShape('natural',this)">
+          <div class="shape-name">natural</div>
+          <div class="shape-preview">
+            <span style="width:88%"></span><span style="width:72%"></span>
+            <span style="width:82%"></span><span style="width:67%"></span>
+          </div>
+        </div>
+        <div class="shape-card" data-shape="flat" onclick="pickShape('flat',this)">
+          <div class="shape-name">flat</div>
+          <div class="shape-preview">
+            <span style="width:90%"></span><span style="width:90%"></span>
+            <span style="width:90%"></span><span style="width:90%"></span>
+          </div>
+        </div>
+        <div class="shape-card" data-shape="wave" onclick="pickShape('wave',this)">
+          <div class="shape-name">wave</div>
+          <div class="shape-preview">
+            <span style="width:90%"></span><span style="width:65%"></span>
+            <span style="width:90%"></span><span style="width:65%"></span>
+          </div>
+        </div>
+        <div class="shape-card" data-shape="triangle" onclick="pickShape('triangle',this)">
+          <div class="shape-name">triangle</div>
+          <div class="shape-preview">
+            <span style="width:95%"></span><span style="width:78%"></span>
+            <span style="width:60%"></span><span style="width:42%"></span>
+          </div>
+        </div>
+        <div class="shape-card" data-shape="ramp" onclick="pickShape('ramp',this)">
+          <div class="shape-name">ramp</div>
+          <div class="shape-preview">
+            <span style="width:42%"></span><span style="width:60%"></span>
+            <span style="width:78%"></span><span style="width:95%"></span>
+          </div>
+        </div>
+        <div class="shape-card" data-shape="staircase" onclick="pickShape('staircase',this)">
+          <div class="shape-name">staircase</div>
+          <div class="shape-preview">
+            <span style="width:95%"></span><span style="width:95%"></span>
+            <span style="width:62%"></span><span style="width:62%"></span>
+          </div>
+        </div>
+      </div>
+      <div class="text-display" style="margin-top:0.8rem">
+        <p id="shape-para">
+          The shape of a rag is the visual silhouette created by the line endings
+          of a paragraph. Typography benefits from deliberate decisions about this
+          silhouette. RagXControl provides multiple shape algorithms so that
+          designers can move far beyond the browser default with full control.
+        </p>
+      </div>
+      <div class="controls" id="shape-intensity-controls">
+        <span class="ctrl-label">intensity:</span>
+        <button class="btn"        onclick="setIntensity(0.3,this)">0.3</button>
+        <button class="btn active" onclick="setIntensity(0.5,this)">0.5</button>
+        <button class="btn"        onclick="setIntensity(0.7,this)">0.7</button>
+        <button class="btn"        onclick="setIntensity(1.0,this)">1.0</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({
+  shape: <span class="str">'wave'</span>,
+  shapeIntensity: <span class="num">0.7</span>
+});</div>
+    </div>
+
+    <!-- ── 6. Small Words & Prepositions ──────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Small Words &amp; Prepositions</h2>
+      <span class="label">Prevent short words orphaning at line-start</span>
+      <div class="text-display">
+        <p id="small-para" style="max-width:36ch">
+          A good rag avoids leaving articles like "a", "an", "the" and prepositions like "in", "of", "to" stranded alone at the end of a line before the next word wraps below it.
+        </p>
+      </div>
+      <div class="controls" id="small-controls">
+        <button class="btn active" onclick="setSmallWords(true, this)">small-words on</button>
+        <button class="btn"        onclick="setSmallWords(false,this)">small-words off</button>
+        <button class="btn active" onclick="setPrepositions(true, this)">prepositions on</button>
+        <button class="btn"        onclick="setPrepositions(false,this)">prepositions off</button>
+      </div>
+      <div class="code-block"><span class="kw">ragxcontrol</span>({
+  smallWords:   { enabled: <span class="kw">true</span>, maxLength: <span class="num">3</span> },
+  prepositions: { enabled: <span class="kw">true</span> }
+});</div>
+    </div>
+
+    <!-- ── 7. Manual Line Breaks ──────────────────────────────────────────── -->
+    <div class="demo-section">
+      <h2>Manual Line Breaks</h2>
+      <span class="label">&lt;wbr data-b="m"&gt; · m=mobile · t=tablet · d=desktop</span>
+      <div class="text-display">
+        <p id="break-para" style="max-width:52ch">
+          Typography is the art of arranging type<wbr data-b="m"> to make written language legible,<wbr data-b="m t"> readable, and visually appealing<wbr data-b="m t d"> when displayed across a wide range of devices.
+        </p>
+      </div>
+      <div id="break-status" style="font-family:'JetBrains Mono',monospace;font-size:0.68rem;margin-top:0.6rem;color:var(--accent);min-height:1.2em"></div>
+      <div class="controls" id="break-controls">
+        <span class="ctrl-label">simulate breakpoint:</span>
+        <button class="btn" onclick="simulateBreakBp('mobile', this)">mobile</button>
+        <button class="btn" onclick="simulateBreakBp('tablet', this)">tablet</button>
+        <button class="btn active" onclick="simulateBreakBp('desktop', this)">desktop</button>
+      </div>
+      <div class="code-block"><span class="cmt">&lt;!-- m = mobile · t = tablet · d = desktop --&gt;</span>
+&lt;<span class="kw">p</span>&gt;
+  Typography is the art of arranging type
+  <span class="str">&lt;wbr data-b="m"&gt;</span>
+  to make written language legible,
+  <span class="str">&lt;wbr data-b="m t"&gt;</span>
+  readable, and visually appealing
+  <span class="str">&lt;wbr data-b="m t d"&gt;</span>
+  when displayed across devices.
+&lt;/<span class="kw">p</span>&gt;</div>
+    </div>
+
+    <!-- ── 8. Full Prose Example ───────────────────────────────────────── -->
+    <div class="demo-section full-example">
+      <h2>Full Prose Example — Everything On</h2>
+      <span class="label">article body · all features combined</span>
+      <div class="text-display" id="full-display">
+        <p id="full1">
+          The finest typographic details are often invisible to the casual reader —
+          but their absence is immediately felt. A widow stranded on the last line
+          of a column, a preposition hanging at the end of a sentence before its
+          object wraps, or an extraordinarily long word that ruptures the edge of
+          a paragraph: these are the small disruptions that undermine readability.
+        </p>
+        <p id="full2">
+          RagXControl operates on the conviction that the web need not be a
+          second-class typographic environment. Every rule that a book compositor
+          applies when setting body text — controlling the measure, managing the
+          rag, hyphenating with care — can be approximated in the browser with
+          a few kilobytes of thoughtful JavaScript.
+        </p>
+        <p id="full3">
+          The measure of a good paragraph is not only the number of characters
+          per line, but the rhythm of the line endings taken as a whole. A
+          well-set rag flows in gentle, irregular steps — never a sudden hole,
+          never a line conspicuously longer than its neighbours. This is the
+          difference between a page that reads and one that merely displays.
+        </p>
+      </div>
+      <div class="controls" id="full-controls">
+        <span class="ctrl-label">align:</span>
+        <button class="btn active" onclick="setFullAlign('left',   this)">left</button>
+        <button class="btn"        onclick="setFullAlign('justify',this)">justify</button>
+        <button class="btn"        onclick="setFullAlign('right',  this)">right</button>
+        <span class="sep">|</span>
+        <span class="ctrl-label">hyphens:</span>
+        <button class="btn active" onclick="setFullHyph(true, this)">on</button>
+        <button class="btn"        onclick="setFullHyph(false,this)">off</button>
+        <span class="sep">|</span>
+        <span class="ctrl-label">shape:</span>
+        <button class="btn active" onclick="setFullShape('natural',  this)">natural</button>
+        <button class="btn"        onclick="setFullShape('triangle', this)">triangle</button>
+        <button class="btn"        onclick="setFullShape('wave',     this)">wave</button>
+        <span class="sep">|</span>
+        <span class="ctrl-label">measure:</span>
+        <button class="btn active" onclick="setFullWidth('72ch',  this)">72ch</button>
+        <button class="btn"        onclick="setFullWidth('55ch',  this)">55ch</button>
+        <button class="btn"        onclick="setFullWidth('40ch',  this)">40ch</button>
+      </div>
+      <div class="code-block"><span class="cmt">// Full prose setup</span>
+<span class="kw">const</span> rm = <span class="kw">ragxcontrol</span>({
+  selector: <span class="str">'article p'</span>,
+  align: <span class="str">'left'</span>,
+  breakpoints: {
+    mobile:  { maxWidth: <span class="num">767</span>,      maxCharsPerLine: <span class="num">42</span> },
+    tablet:  { maxWidth: <span class="num">1023</span>,     maxCharsPerLine: <span class="num">62</span> },
+    desktop: { maxWidth: Infinity, maxCharsPerLine: <span class="num">75</span> }
+  },
+  hyphenation:  { enabled: <span class="kw">true</span>, minWordLength: <span class="num">7</span> },
+  widows:        { enabled: <span class="kw">true</span>, minWords: <span class="num">2</span> },
+  smallWords:    { enabled: <span class="kw">true</span> },
+  prepositions:  { enabled: <span class="kw">true</span> },
+  dashes:        { enabled: <span class="kw">true</span> },
+  shape: <span class="str">'natural'</span>,
+  observe: <span class="kw">true</span>
+});</div>
+    </div>
+
+  </div><!-- .demos -->
+</div><!-- .page -->
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  UTILITY
+// ─────────────────────────────────────────────────────────────────────────────
+
+function activateIn(controlsId, clickedBtn) {
+  document.querySelectorAll('#' + controlsId + ' .btn')
+    .forEach(b => b.classList.remove('active'));
+  clickedBtn.classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BREAKPOINT BADGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+function updateBadge() {
+  var w = window.innerWidth;
+  var lbl = w <= 767 ? 'mobile' : w <= 1023 ? 'tablet' : 'desktop';
+  document.getElementById('bp-badge').textContent = lbl + ' · ' + w + 'px';
+}
+window.addEventListener('resize', updateBadge);
+updateBadge();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  1. ALIGNMENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+function setAlign(val, btn) {
+  activateIn('align-controls', btn);
+  document.getElementById('align-para').style.textAlign = val;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  2. BREAKPOINTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+function setBpDemo(ch, btn) {
+  activateIn('bp-controls', btn);
+  document.getElementById('bp-demo').style.maxWidth = ch >= 999 ? 'none' : ch + 'ch';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  3. HYPHENATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+var HYPH_ORIGINAL = null; // stores original text before SHY insertion
+var SHY = '\u00AD';
+
+// Very simple English syllable-boundary heuristic: split on consonant+vowel
+// transitions while respecting minimum char rules.
+function hyphenateWord(word, minBefore, minAfter) {
+  if (word.length < 6) return word;
+  var vowels = 'aeiouAEIOU';
+  var result = '';
+  for (var i = 0; i < word.length - 1; i++) {
+    result += word[i];
+    var isConsonantBeforeVowel = vowels.indexOf(word[i]) === -1 && vowels.indexOf(word[i+1]) !== -1;
+    var charsAfter = word.length - i - 1;
+    if (isConsonantBeforeVowel && i + 1 >= minBefore && charsAfter >= minAfter && i > 0) {
+      result += SHY;
+    }
+  }
+  result += word[word.length - 1];
+  return result;
+}
+
+function applyHyphenation(enabled) {
+  var p = document.getElementById('hyph-para');
+  if (HYPH_ORIGINAL === null) HYPH_ORIGINAL = p.innerText;
+
+  if (!enabled) {
+    p.style.hyphens = 'none';
+    p.style.webkitHyphens = 'none';
+    // Strip any SHY
+    p.innerHTML = HYPH_ORIGINAL;
+    return;
+  }
+
+  // Apply: use CSS hyphens:auto (most effective) + lang attribute
+  p.lang = 'en';
+  p.style.hyphens = 'auto';
+  p.style.webkitHyphens = 'auto';
+
+  // Also inject SHY manually for our demonstration
+  var text = HYPH_ORIGINAL;
+  var hyphenated = text.replace(/\b([a-zA-Z]{6,})\b/g, function(word) {
+    return hyphenateWord(word, 3, 3);
+  });
+  p.innerHTML = hyphenated;
+}
+
+function setHyph(enabled, btn) {
+  // Only activate within the first two buttons (enabled/disabled)
+  var controls = document.getElementById('hyph-controls');
+  var enBtns = controls.querySelectorAll('.btn');
+  // deactivate only the first two
+  enBtns[0].classList.remove('active');
+  enBtns[1].classList.remove('active');
+  btn.classList.add('active');
+  applyHyphenation(enabled);
+}
+
+function setHyphWidth(val, btn) {
+  var controls = document.getElementById('hyph-controls');
+  var allBtns = controls.querySelectorAll('.btn');
+  // deactivate last two buttons only
+  allBtns[allBtns.length - 1].classList.remove('active');
+  allBtns[allBtns.length - 2].classList.remove('active');
+  btn.classList.add('active');
+  document.getElementById('hyph-para').style.maxWidth = val;
+}
+
+// Init hyphenation on load
+applyHyphenation(true);
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  4. WIDOWS & ORPHANS
+// ─────────────────────────────────────────────────────────────────────────────
+
+var WIDOW_ORIGINAL = 'Without widow control a single short word can end up stranded alone on the last line of a paragraph which looks quite bad.';
+var widowEnabled = true;
+var widowN = 2;
+var NBSP = '\u00A0';
+
+function renderWidow() {
+  var p = document.getElementById('widow-para');
+  var status = document.getElementById('widow-status');
+
+  if (!widowEnabled) {
+    p.innerHTML = WIDOW_ORIGINAL;
+    status.textContent = 'widows: OFF — last line may strand a single word';
+    return;
+  }
+
+  var words = WIDOW_ORIGINAL.split(' ');
+  // Glue last widowN words with NBSP
+  var n = Math.min(widowN, words.length - 1);
+  var gluedWords = [];
+  for (var i = 0; i < words.length; i++) {
+    if (i === words.length - n) {
+      // Join remaining words with NBSP
+      gluedWords.push(words.slice(i).join(NBSP));
+      break;
+    } else {
+      gluedWords.push(words[i]);
+    }
+  }
+  p.innerHTML = gluedWords.join(' ');
+  status.textContent = 'widows: ON — last ' + n + ' word' + (n>1?'s':'') + ' glued with &nbsp;';
+}
+
+function setWidow(enabled, btn) {
+  var controls = document.getElementById('widow-controls');
+  var btns = controls.querySelectorAll('.btn');
+  btns[0].classList.remove('active');
+  btns[1].classList.remove('active');
+  btn.classList.add('active');
+  widowEnabled = enabled;
+  renderWidow();
+}
+
+function setWidowN(n, btn) {
+  // Activate only among the "glue last N" buttons
+  var controls = document.getElementById('widow-controls');
+  var allBtns = controls.querySelectorAll('.btn');
+  // Last 4 buttons are the N-word buttons
+  for (var i = 2; i < allBtns.length; i++) allBtns[i].classList.remove('active');
+  btn.classList.add('active');
+  widowN = n;
+  renderWidow();
+}
+
+renderWidow();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  5. RAG SHAPE
+// ─────────────────────────────────────────────────────────────────────────────
+
+var currentShape = 'natural';
+var currentIntensity = 0.5;
+
+// Shape is implemented by rebuilding the paragraph as individual <div> lines,
+// each with a computed max-width, using canvas text measurement.
+var SHAPE_ORIGINAL_TEXT = document.getElementById('shape-para').innerText.replace(/\s+/g, ' ').trim();
+
+function measureTextWidth(text, font) {
+  var canvas = measureTextWidth._canvas || (measureTextWidth._canvas = document.createElement('canvas'));
+  var ctx = canvas.getContext('2d');
+  ctx.font = font;
+  return ctx.measureText(text).width;
+}
+
+function getFont(el) {
+  var s = window.getComputedStyle(el);
+  return s.fontWeight + ' ' + s.fontSize + ' ' + s.fontFamily;
+}
+
+// Compute ideal target width for each line index given a shape.
+// Returns an array of pixel widths — one per line.
+function computeLineWidths(lineCount, shape, intensity, containerWidth) {
+  var result = [];
+  var full = containerWidth;
+  // Minimum line width: 30% of container so text never becomes unreadable
+  var minW = full * 0.30;
+  // How far we allow the shape to deviate from full width
+  var reach = full * 0.55 * intensity; // max shortfall from full width
+
+  for (var i = 0; i < lineCount; i++) {
+    var t = lineCount > 1 ? i / (lineCount - 1) : 0; // 0 = first line, 1 = last
+    var w;
+    switch (shape) {
+      case 'flat':
+        w = full;
+        break;
+
+      case 'wave':
+        // Smooth sine: alternates long-short-long-short
+        w = full - reach * Math.sin(t * Math.PI * 2.5);
+        break;
+
+      case 'triangle':
+        // Strict linear taper: first line = full, last line = full - reach
+        // Use a clean linear ramp so the rag edge is a straight diagonal
+        w = full - reach * t;
+        break;
+
+      case 'ramp':
+        // Mirror of triangle: first line = full - reach, last line = full
+        w = (full - reach) + reach * t;
+        break;
+
+      case 'staircase': {
+        // Divide lines into 3 equal steps, each step shorter than previous
+        var steps = 3;
+        var stepIdx = Math.min(Math.floor(t * steps), steps - 1);
+        w = full - (reach / (steps - 1)) * stepIdx;
+        break;
+      }
+
+      default:
+        w = full;
+    }
+
+    result.push(Math.max(Math.round(w), Math.round(minW)));
+  }
+  return result;
+}
+
+// Pack words greedily into lines at exact target widths.
+// Each line is rendered as a nowrap span so the rag edge is pixel-precise.
+function packWordsIntoLines(words, targetWidths, font, spaceW) {
+  var lines = [];
+  var wordIdx = 0;
+  var lineCount = targetWidths.length;
+
+  for (var li = 0; li < lineCount; li++) {
+    var budget = targetWidths[li];
+    var lineWords = [];
+    var usedW = 0;
+
+    while (wordIdx < words.length) {
+      var ww = measureTextWidth(words[wordIdx], font);
+      var needed = usedW + (lineWords.length ? spaceW : 0) + ww;
+
+      if (needed <= budget) {
+        // Word fits — add it
+        usedW = needed;
+        lineWords.push(words[wordIdx++]);
+      } else {
+        // Word doesn't fit
+        if (lineWords.length === 0) {
+          // Line is empty and single word already exceeds budget — force it anyway
+          lineWords.push(words[wordIdx++]);
+        }
+        break;
+      }
+    }
+
+    if (lineWords.length > 0) {
+      lines.push(lineWords.join(' '));
+    }
+
+    // If we've used all words before all line slots, stop
+    if (wordIdx >= words.length) break;
+  }
+
+  // Safety: any remaining words spill onto a final line
+  if (wordIdx < words.length) {
+    lines.push(words.slice(wordIdx).join(' '));
+  }
+
+  return lines;
+}
+
+function applyShape(shape, intensity) {
+  var container = document.getElementById('shape-para');
+  container.innerHTML = SHAPE_ORIGINAL_TEXT;
+
+  if (shape === 'natural') {
+    container.style.maxWidth = '';
+    container.style.whiteSpace = '';
+    return;
+  }
+
+  var words = SHAPE_ORIGINAL_TEXT.replace(/\s+/g, ' ').trim().split(' ');
+  var containerWidth = container.getBoundingClientRect().width;
+  if (!containerWidth) containerWidth = 500;
+
+  var font = getFont(container);
+  var spaceW = measureTextWidth(' ', font);
+
+  // ── Step 1: count natural lines at full width ──────────────────────────
+  var naturalLineCount = 0;
+  var curW = 0;
+  var lineStarted = false;
+  for (var i = 0; i < words.length; i++) {
+    var ww = measureTextWidth(words[i], font);
+    var needed = curW + (lineStarted ? spaceW : 0) + ww;
+    if (needed > containerWidth && lineStarted) {
+      naturalLineCount++;
+      curW = ww;
+      lineStarted = true;
+    } else {
+      curW = needed;
+      lineStarted = true;
+    }
+  }
+  if (lineStarted) naturalLineCount++;
+
+  if (naturalLineCount < 2) {
+    container.innerHTML = SHAPE_ORIGINAL_TEXT;
+    return;
+  }
+
+  // ── Step 2: compute target width per line ──────────────────────────────
+  var targetWidths = computeLineWidths(naturalLineCount, shape, intensity, containerWidth);
+
+  // ── Step 3: pack words greedily into those width budgets ───────────────
+  var packedLines = packWordsIntoLines(words, targetWidths, font, spaceW);
+
+  // ── Step 4: render — each line is nowrap so its right edge is exact ────
+  var html = '';
+  for (var li = 0; li < packedLines.length; li++) {
+    // white-space:nowrap locks the text to one line; the span's natural
+    // pixel width becomes the precise rag edge for this line.
+    html += '<span data-shape-line style="display:block; white-space:nowrap; overflow:visible;">'
+          + packedLines[li]
+          + '</span>';
+  }
+
+  container.innerHTML = html;
+}
+
+function pickShape(shape, card) {
+  currentShape = shape;
+  document.querySelectorAll('#shape-cards .shape-card')
+    .forEach(function(c) { c.classList.remove('active'); });
+  card.classList.add('active');
+  applyShape(shape, currentIntensity);
+}
+
+function setIntensity(val, btn) {
+  activateIn('shape-intensity-controls', btn);
+  currentIntensity = val;
+  applyShape(currentShape, val);
+}
+
+// Run shape on load after fonts settle
+window.addEventListener('load', function() {
+  applyShape(currentShape, currentIntensity);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  6. SMALL WORDS & PREPOSITIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+var SMALL_ORIGINAL = 'A good rag avoids leaving articles like "a", "an", "the" and prepositions like "in", "of", "to" stranded alone at the end of a line before the next word wraps below it.';
+var smallWordsOn = true;
+var prepositionsOn = true;
+
+var SMALL_WORDS   = ['a','an','the','or','nor','so','yet','not','just','than','then','that','this','both','either','is','it','as'];
+var PREPOSITIONS  = ['in','on','at','by','for','of','to','up','with','from','into','onto','upon','over','under','before','after','between','among'];
+
+function applySmallWords() {
+  var p = document.getElementById('small-para');
+  var wordList = [];
+  if (smallWordsOn)   wordList = wordList.concat(SMALL_WORDS);
+  if (prepositionsOn) wordList = wordList.concat(PREPOSITIONS);
+
+  if (!wordList.length) {
+    p.innerHTML = SMALL_ORIGINAL;
+    return;
+  }
+
+  // Replace space before each small/prep word with NBSP so it stays attached
+  var result = SMALL_ORIGINAL.replace(/(\s+)(\S+)/g, function(match, space, word) {
+    var clean = word.replace(/[^a-zA-Z]/g, '').toLowerCase();
+    if (wordList.indexOf(clean) !== -1) return NBSP + word;
+    return match;
+  });
+  p.innerHTML = result;
+}
+
+function setSmallWords(on, btn) {
+  var controls = document.getElementById('small-controls');
+  var btns = controls.querySelectorAll('.btn');
+  btns[0].classList.remove('active');
+  btns[1].classList.remove('active');
+  btn.classList.add('active');
+  smallWordsOn = on;
+  applySmallWords();
+}
+
+function setPrepositions(on, btn) {
+  var controls = document.getElementById('small-controls');
+  var btns = controls.querySelectorAll('.btn');
+  btns[2].classList.remove('active');
+  btns[3].classList.remove('active');
+  btn.classList.add('active');
+  prepositionsOn = on;
+  applySmallWords();
+}
+
+applySmallWords();
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  7. FULL PROSE EXAMPLE
+// ─────────────────────────────────────────────────────────────────────────────
+
+var FULL_ORIGINALS = {
+  full1: null,
+  full2: null,
+  full3: null
+};
+
+// Capture originals
+['full1','full2','full3'].forEach(function(id) {
+  FULL_ORIGINALS[id] = document.getElementById(id).innerText.replace(/\s+/g, ' ').trim();
+});
+
+var fullShape     = 'natural';
+var fullHyph      = true;
+var fullAlign     = 'left';
+var fullWidth     = '72ch';
+
+function renderFull() {
+  ['full1','full2','full3'].forEach(function(id) {
+    var p = document.getElementById(id);
+    var text = FULL_ORIGINALS[id];
+
+    // Alignment
+    p.style.textAlign = fullAlign;
+
+    // Max width
+    p.style.maxWidth = fullWidth;
+
+    // Hyphens
+    if (fullHyph) {
+      p.lang = 'en';
+      p.style.hyphens = 'auto';
+      p.style.webkitHyphens = 'auto';
+      p.innerHTML = text.replace(/\b([a-zA-Z]{7,})\b/g, function(word) {
+        return hyphenateWord(word, 3, 3);
+      });
+    } else {
+      p.style.hyphens = 'none';
+      p.style.webkitHyphens = 'none';
+      p.innerHTML = text;
+    }
+  });
+
+  // Apply shape to each paragraph
+  if (fullShape !== 'natural') {
+    ['full1','full2','full3'].forEach(function(id) {
+      applyShapeTo(id, FULL_ORIGINALS[id], fullShape, 0.5);
+    });
+  }
+}
+
+function applyShapeTo(id, originalText, shape, intensity) {
+  var container = document.getElementById(id);
+  var words = originalText.replace(/\s+/g, ' ').trim().split(' ');
+  var containerWidth = container.getBoundingClientRect().width;
+  if (!containerWidth || words.length < 4) return;
+
+  var font = getFont(container);
+  var spaceW = measureTextWidth(' ', font);
+
+  // Count natural lines at full container width
+  var naturalLineCount = 0;
+  var curW = 0;
+  var started = false;
+  for (var i = 0; i < words.length; i++) {
+    var ww = measureTextWidth(words[i], font);
+    var needed = curW + (started ? spaceW : 0) + ww;
+    if (needed > containerWidth && started) {
+      naturalLineCount++;
+      curW = ww;
+    } else {
+      curW = needed;
+      started = true;
+    }
+  }
+  if (started) naturalLineCount++;
+  if (naturalLineCount < 2) return;
+
+  var targetWidths = computeLineWidths(naturalLineCount, shape, intensity, containerWidth);
+  var packedLines  = packWordsIntoLines(words, targetWidths, font, spaceW);
+
+  var html = '';
+  for (var li = 0; li < packedLines.length; li++) {
+    html += '<span data-shape-line style="display:block; white-space:nowrap; overflow:visible;">' + packedLines[li] + '</span>';
+  }
+  container.innerHTML = html;
+}
+
+function setFullAlign(val, btn) {
+  // Activate only alignment buttons (first 3)
+  var btns = document.querySelectorAll('#full-controls .btn');
+  btns[0].classList.remove('active');
+  btns[1].classList.remove('active');
+  btns[2].classList.remove('active');
+  btn.classList.add('active');
+  fullAlign = val;
+  renderFull();
+}
+
+function setFullHyph(val, btn) {
+  var btns = document.querySelectorAll('#full-controls .btn');
+  btns[3].classList.remove('active');
+  btns[4].classList.remove('active');
+  btn.classList.add('active');
+  fullHyph = val;
+  renderFull();
+}
+
+function setFullShape(shape, btn) {
+  var btns = document.querySelectorAll('#full-controls .btn');
+  btns[5].classList.remove('active');
+  btns[6].classList.remove('active');
+  btns[7].classList.remove('active');
+  btn.classList.add('active');
+  fullShape = shape;
+  renderFull();
+}
+
+function setFullWidth(w, btn) {
+  var btns = document.querySelectorAll('#full-controls .btn');
+  btns[8].classList.remove('active');
+  btns[9].classList.remove('active');
+  btns[10].classList.remove('active');
+  btn.classList.add('active');
+  fullWidth = w;
+  renderFull();
+}
+
+window.addEventListener('load', function() { renderFull(); applyBreakDemo('desktop'); });
+window.addEventListener('resize', function() {
+  applyShape(currentShape, currentIntensity);
+  renderFull();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  7. MANUAL LINE BREAKS  — data-b="m t d"
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Map flag letter → breakpoint name
+var BREAK_FLAGS = { m: 'mobile', t: 'tablet', d: 'desktop' };
+
+function applyBreakDemo(bpName) {
+  var para = document.getElementById('break-para');
+  var status = document.getElementById('break-status');
+  var wbrs = para.querySelectorAll('wbr[data-b]');
+  var activeCount = 0;
+
+  wbrs.forEach(function(wbr) {
+    var flags = (wbr.getAttribute('data-b') || '').trim().split(/\s+/);
+    var bpNames = flags.map(function(f) { return BREAK_FLAGS[f]; }).filter(Boolean);
+    if (bpNames.indexOf(bpName) !== -1) {
+      wbr.style.display = 'inline';
+      activeCount++;
+    } else {
+      wbr.style.display = 'none';
+    }
+  });
+
+  var labels = { mobile: 'm', tablet: 'm t', desktop: 'm t d' };
+  status.textContent = 'breakpoint: ' + bpName
+    + ' — ' + activeCount + ' break' + (activeCount !== 1 ? 's' : '') + ' active'
+    + ' (data-b flags: "' + (labels[bpName] || bpName) + '" and narrower)';
+}
+
+function simulateBreakBp(bp, btn) {
+  activateIn('break-controls', btn);
+  applyBreakDemo(bp);
+}
+</script>
+</body>
+</html>

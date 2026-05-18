@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RagXControl — Email Preprocessor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ── Reset ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:     #1a1612;
+  --paper:   #f5f1eb;
+  --rule:    #c8bfb0;
+  --mid:     #6b6157;
+  --accent:  #c0392b;
+  --success: #27704a;
+  --code-bg: #1e1a17;
+  --code-fg: #e8ddd0;
+  --radius:  2px;
+}
+
+html { font-size: 15px; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 300;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Shared atoms ──────────────────────────────────────────────────────────── */
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.18em 0.5em;
+  letter-spacing: 0.07em;
+  border-radius: var(--radius);
+}
+
+.pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.55rem;
+  border: 1px solid var(--rule);
+  padding: 0.1em 0.45em;
+  color: var(--mid);
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  border-radius: var(--radius);
+}
+.pill.ok  { border-color: var(--success); color: var(--success); }
+.pill.err { border-color: var(--accent);  color: var(--accent); }
+
+/* ghost button */
+.gbtn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--mid);
+  padding: 0.28em 0.7em;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  border-radius: var(--radius);
+  white-space: nowrap;
+}
+.gbtn:hover        { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.gbtn.ok           { background: var(--success); color: #fff; border-color: var(--success); }
+.gbtn.accent-fill  { background: var(--accent); color: #fff; border-color: var(--accent); }
+.gbtn.accent-fill:hover { background: #a93226; border-color: #a93226; }
+
+/* toggle row */
+.tog { display: inline-flex; border: 1px solid var(--rule); border-radius: var(--radius); overflow: hidden; }
+.tog button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  border: none;
+  background: transparent;
+  color: var(--mid);
+  padding: 0.25em 0.65em;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.1s, color 0.1s;
+  border-right: 1px solid var(--rule);
+}
+.tog button:last-child { border-right: none; }
+.tog button.on { background: var(--ink); color: var(--paper); }
+
+/* labelled control group */
+.cg { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
+.cg > .lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mid);
+  white-space: nowrap;
+}
+
+/* form inputs */
+.ni, .si {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink);
+  padding: 0.22em 0.4em;
+  border-radius: var(--radius);
+  outline: none;
+}
+.ni { width: 3.6rem; text-align: center; }
+.si { cursor: pointer; }
+.ni:focus, .si:focus { outline: 1px solid var(--accent); }
+
+.vdiv { width: 1px; height: 18px; background: var(--rule); flex-shrink: 0; align-self: center; }
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+header {
+  border-bottom: 2px solid var(--ink);
+  padding: 0.75rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--paper);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+header h1 em {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--mid);
+  font-size: 1rem;
+}
+.header-right { margin-left: auto; display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+
+/* ── Preset bar ─────────────────────────────────────────────────────────────── */
+.preset-bar {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  background: #fff;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.preset-bar .lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mid);
+  white-space: nowrap;
+}
+.preset-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--mid);
+  padding: 0.3em 0.9em;
+  cursor: pointer;
+  transition: all 0.1s;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.preset-btn .icon { font-size: 0.85rem; line-height: 1; }
+.preset-btn:hover  { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.preset-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.preset-details {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--mid);
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+/* ── Options bar ────────────────────────────────────────────────────────────── */
+.options-bar {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.7rem 1.2rem;
+  background: #faf7f3;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Tab bar (mobile panel switcher) ───────────────────────────────────────── */
+.tab-bar {
+  display: none;   /* shown via media query */
+  border-bottom: 1px solid var(--rule);
+  background: #fff;
+  flex-shrink: 0;
+}
+.tab-bar button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: none;
+  background: transparent;
+  color: var(--mid);
+  padding: 0.7rem 1.1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 0.1s, border-color 0.1s;
+  flex: 1;
+}
+.tab-bar button.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+/* ── Workspace ──────────────────────────────────────────────────────────────── */
+.workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Panel ──────────────────────────────────────────────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--rule);
+  overflow: hidden;
+  min-height: 0;
+}
+.panel:last-child { border-right: none; }
+
+.panel-head {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #faf7f3;
+  flex-shrink: 0;
+}
+.panel-head h2 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid);
+  font-weight: 600;
+}
+.panel-head .right { margin-left: auto; display: flex; gap: 0.3rem; align-items: center; }
+
+/* ── Textarea ───────────────────────────────────────────────────────────────── */
+.input-area {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem;
+  line-height: 1.65;
+  padding: 1rem 1.1rem;
+  border: none;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+  background: #fff;
+  color: var(--ink);
+  min-height: 0;
+}
+.input-area::placeholder { color: var(--rule); font-style: italic; }
+
+/* ── Image manager ──────────────────────────────────────────────────────────── */
+.img-manager { border-top: 1px solid var(--rule); background: #faf7f3; flex-shrink: 0; }
+.img-manager-head {
+  padding: 0.35rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.img-manager-head .lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--mid);
+}
+#img-file-input { display: none; }
+.img-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.45rem 1rem;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.img-list:empty::after {
+  content: 'No images yet';
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--rule);
+  font-style: italic;
+}
+.img-thumb {
+  border: 1px solid var(--rule);
+  background: #fff;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 76px;
+  border-radius: var(--radius);
+}
+.img-thumb img { width: 58px; height: 40px; object-fit: cover; display: block; }
+.img-thumb-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  color: var(--mid);
+  text-align: center;
+  max-width: 68px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.img-thumb-btns { display: flex; gap: 0.15rem; }
+.img-thumb-btns button {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.5rem;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--mid);
+  padding: 0.1em 0.3em;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.1s;
+}
+.img-thumb-btns button:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.img-thumb-btns button.del:hover { background: var(--accent); border-color: var(--accent); }
+
+/* ── Code area ──────────────────────────────────────────────────────────────── */
+.code-area {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.67rem;
+  line-height: 1.65;
+  padding: 1rem 1.1rem;
+  overflow-y: auto;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 0;
+}
+.shy-mark  { color: #f0c080; }
+.nbsp-mark { color: #a8d0a0; }
+.br-mark   { color: #80c0e8; }
+.wrap-mark { color: #d090e8; }
+.tag-mark  { color: #e88080; }
+.attr-mark { color: #80b8e0; }
+
+/* ── Preview typography bar ────────────────────────────────────────────────── */
+.preview-typo-bar {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.4rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  background: #fff;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Preview ────────────────────────────────────────────────────────────────── */
+.preview-scroll {
+  flex: 1;
+  overflow: auto;
+  background: #c8c2ba;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.2rem 1rem;
+  min-height: 0;
+}
+#preview-iframe {
+  border: none;
+  background: #fff;
+  box-shadow: 0 2px 14px rgba(0,0,0,0.2);
+  display: block;
+  flex-shrink: 0;
+  transition: width 0.2s;
+}
+
+/* ── Status bar ─────────────────────────────────────────────────────────────── */
+.statusbar {
+  border-top: 1px solid var(--rule);
+  padding: 0.3rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  background: #faf7f3;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--mid);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  min-height: 28px;
+}
+.statusbar .stat b { color: var(--ink); }
+.statusbar .stat.good b { color: var(--success); }
+.statusbar .stat.warn b { color: var(--accent); }
+
+/* ── Legend ─────────────────────────────────────────────────────────────────── */
+.legend-bar {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.25rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  background: #faf7f3;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--mid);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.lg { display: flex; align-items: center; gap: 0.3rem; }
+.sw { width: 7px; height: 7px; border-radius: 1px; flex-shrink: 0; display: inline-block; }
+
+/* ── Mobile layout ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  html, body { height: auto; overflow: auto; }
+
+  .workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .panel {
+    border-right: none;
+    border-bottom: 1px solid var(--rule);
+    overflow: visible;
+    min-height: 0;
+    display: none;        /* tabs control visibility */
+  }
+  .panel.tab-active { display: flex; }
+
+  /* On mobile all panels are auto-height */
+  .input-area  { min-height: 240px; max-height: 40vh; }
+  .code-area   { min-height: 200px; max-height: 35vh; }
+  .preview-scroll { min-height: 300px; max-height: 60vh; }
+
+  .tab-bar { display: flex; }
+
+  .vdiv { display: none; }
+
+  .preset-details { display: none; }
+
+  /* stack options bar items */
+  .options-bar { gap: 0.55rem 1rem; padding: 0.5rem 1rem; }
+
+  header { padding: 0.65rem 1rem; }
+  header h1 { font-size: 1.1rem; }
+  header h1 em { font-size: 0.9rem; }
+
+  .preset-bar { padding: 0.45rem 1rem; gap: 0.4rem; }
+
+  .legend-bar { display: none; }
+}
+
+@media (max-width: 500px) {
+  header h1 em { display: none; }
+  .options-bar .cg { flex-wrap: wrap; }
+}
+
+/* ── Dark mode ──────────────────────────────────────────────────────────────── */
+body.dark {
+  --ink:     #e8e0d5;
+  --paper:   #1a1714;
+  --rule:    #3a3530;
+  --mid:     #8a8078;
+  --accent:  #e05a4a;
+  --success: #4caf78;
+  --code-bg: #111009;
+  --code-fg: #e8ddd0;
+}
+
+/* surface overrides — elements using hardcoded colours */
+body.dark header           { background: #1a1714; }
+body.dark .preset-bar      { background: #1f1c19; }
+body.dark .options-bar     { background: #1c1a17; }
+body.dark .panel-head      { background: #1f1c19; }
+body.dark .preview-typo-bar{ background: #1f1c19; }
+body.dark .tab-bar         { background: #1f1c19; }
+body.dark .tab-bar button  { color: var(--mid); }
+body.dark .tab-bar button.active { color: var(--ink); }
+body.dark .statusbar       { background: #1c1a17; }
+body.dark .legend-bar      { background: #1c1a17; }
+body.dark .input-area      { background: #141210; color: var(--ink); }
+body.dark .ni, body.dark .si { background: #1c1a17; color: var(--ink); border-color: var(--rule); }
+body.dark .preview-scroll  { background: #0e0d0c; }
+body.dark .img-manager     { background: #1c1a17; }
+body.dark .img-thumb       { background: #1f1c19; border-color: var(--rule); }
+body.dark .img-manager-head { background: #1c1a17; }
+
+/* dark mode toggle button state */
+#dark-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header>
+  <h1>RagXControl <em>Email Preprocessor</em> <span class="badge">v3.1</span></h1>
+  <div class="header-right">
+    <button class="gbtn" onclick="loadExample()">load example</button>
+    <button class="gbtn" id="dark-btn" onclick="toggleDark(this)" title="Toggle dark mode">◑ dark</button>
+    <button class="gbtn accent-fill" onclick="runProcess()">▶ Process<span style="opacity:0.6;font-size:0.55rem;margin-left:0.3rem">⌘↵</span></button>
+  </div>
+</header>
+
+<!-- ── Preset bar ───────────────────────────────────────────────────────────── -->
+<div class="preset-bar">
+  <span class="lbl">Preset:</span>
+  <button class="preset-btn active" id="preset-desktop" onclick="applyPreset('desktop',this)">
+    <span class="icon">🖥</span> Desktop
+  </button>
+  <button class="preset-btn" id="preset-tablet" onclick="applyPreset('tablet',this)">
+    <span class="icon">📱</span> Tablet
+  </button>
+  <button class="preset-btn" id="preset-mobile" onclick="applyPreset('mobile',this)">
+    <span class="icon">📲</span> Mobile
+  </button>
+  <span class="preset-details" id="preset-details">600px · 16px Georgia · weight 300 · line-height 1.65</span>
+</div>
+
+<!-- ── Options bar ──────────────────────────────────────────────────────────── -->
+<div class="options-bar">
+
+  <div class="cg">
+    <span class="lbl">&shy; hyphens</span>
+    <div class="tog">
+      <button class="on" onclick="tog('shy',true,this)">on</button>
+      <button onclick="tog('shy',false,this)">off</button>
+    </div>
+  </div>
+
+  <div class="cg">
+    <span class="lbl">min word</span>
+    <input class="ni" id="shy-min" type="number" value="6" min="4" max="20">
+  </div>
+
+  <div class="vdiv"></div>
+
+  <div class="cg">
+    <span class="lbl">widow &nbsp;</span>
+    <div class="tog">
+      <button class="on" onclick="tog('widow',true,this)">on</button>
+      <button onclick="tog('widow',false,this)">off</button>
+    </div>
+  </div>
+
+  <div class="cg">
+    <span class="lbl">glue N</span>
+    <input class="ni" id="widow-n" type="number" value="2" min="1" max="6">
+  </div>
+
+  <div class="vdiv"></div>
+
+  <div class="cg">
+    <span class="lbl">mobile &lt;br&gt;</span>
+    <div class="tog">
+      <button class="on" onclick="tog('br',true,this)">on</button>
+      <button onclick="tog('br',false,this)">off</button>
+    </div>
+  </div>
+
+  <div class="vdiv"></div>
+
+  <div class="cg">
+    <span class="lbl">table wrap</span>
+    <div class="tog">
+      <button class="on" onclick="tog('wrap',true,this)">on</button>
+      <button onclick="tog('wrap',false,this)">off</button>
+    </div>
+  </div>
+
+  <div class="cg">
+    <span class="lbl">col px</span>
+    <input class="ni" id="col-w" type="number" value="600" min="200" max="900">
+  </div>
+
+  <div class="vdiv"></div>
+
+  <div class="cg">
+    <span class="lbl">bg</span>
+    <input type="color" id="bg-color" value="#ffffff"
+      style="width:26px;height:22px;border:1px solid var(--rule);padding:1px;cursor:pointer;background:transparent;border-radius:2px;">
+  </div>
+
+</div>
+
+<!-- ── Legend ───────────────────────────────────────────────────────────────── -->
+<div class="legend-bar">
+  <span style="color:var(--ink);font-weight:600;">highlights:</span>
+  <span class="lg"><span class="sw" style="background:#f0c080"></span>&amp;shy;</span>
+  <span class="lg"><span class="sw" style="background:#a8d0a0"></span>&amp;nbsp;</span>
+  <span class="lg"><span class="sw" style="background:#80c0e8"></span>&lt;br&gt; spans</span>
+  <span class="lg"><span class="sw" style="background:#d090e8"></span>table</span>
+  <span class="lg"><span class="sw" style="background:#e88080"></span>tags</span>
+  <span style="margin-left:auto;opacity:0.6">preview = full email DOCTYPE in iframe</span>
+</div>
+
+<!-- ── Tab bar (mobile) ─────────────────────────────────────────────────────── -->
+<div class="tab-bar" id="tab-bar">
+  <button class="active" onclick="switchTab('input',this)">Input</button>
+  <button onclick="switchTab('code',this)">Code</button>
+  <button onclick="switchTab('preview',this)">Preview</button>
+</div>
+
+<!-- ── Workspace ────────────────────────────────────────────────────────────── -->
+<div class="workspace">
+
+  <!-- Panel 1: Input -->
+  <div class="panel tab-active" id="panel-input">
+    <div class="panel-head">
+      <h2>Input</h2>
+      <span class="pill">HTML or plain text</span>
+      <div class="right">
+        <button class="gbtn" onclick="clearInput()">clear</button>
+      </div>
+    </div>
+    <textarea class="input-area" id="input-area" spellcheck="false"
+      placeholder="Paste email HTML here…
+
+Supports <p> <h1–h6> <td> <div> <li>
+Plain text paragraphs also work.
+
+Use &lt;wbr data-b=&quot;m&quot;&gt; for mobile breaks.
+Add images below, then click Insert."></textarea>
+    <div class="img-manager">
+      <div class="img-manager-head">
+        <span class="lbl">Images</span>
+        <button class="gbtn" onclick="document.getElementById('img-file-input').click()">+ Add image</button>
+        <input type="file" id="img-file-input" accept="image/*" multiple onchange="handleImageUpload(event)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.52rem;opacity:0.5;margin-left:auto;">base64 embedded</span>
+      </div>
+      <div class="img-list" id="img-list"></div>
+    </div>
+  </div>
+
+  <!-- Panel 2: Code -->
+  <div class="panel" id="panel-code">
+    <div class="panel-head">
+      <h2>Code output</h2>
+      <span class="pill" id="code-pill">ready</span>
+      <div class="right">
+        <button class="gbtn" id="copy-html-btn" onclick="copyCode()">copy HTML</button>
+        <button class="gbtn" id="copy-full-btn" onclick="copyFull()">copy DOCTYPE</button>
+      </div>
+    </div>
+    <div class="code-area" id="code-area"><span style="color:#4a3f35;font-style:italic">// Output appears here after processing…</span></div>
+  </div>
+
+  <!-- Panel 3: Preview -->
+  <div class="panel" id="panel-preview">
+    <div class="panel-head">
+      <h2>Preview</h2>
+      <span class="pill" id="prev-pill">—</span>
+      <div class="right">
+        <button class="gbtn" id="copy-prev-btn" onclick="copyPreview()">copy for email</button>
+        <!-- preview width mini-toggle -->
+        <div class="tog" id="pw-tog" style="margin-left:0.3rem;">
+          <button onclick="setPW(320,this)">320</button>
+          <button onclick="setPW(480,this)">480</button>
+          <button class="on" onclick="setPW(600,this)">600</button>
+          <button onclick="setPW(800,this)">800</button>
+        </div>
+      </div>
+    </div>
+    <!-- Typography toolbar for the preview -->
+    <div class="preview-typo-bar" id="preview-typo-bar">
+      <div class="cg">
+        <span class="lbl">font</span>
+        <select class="si" id="pv-font-family" onchange="pvApplyFont()">
+          <option value="Georgia,'Times New Roman',serif">Georgia</option>
+          <option value="'Times New Roman',Times,serif">Times New Roman</option>
+          <option value="Palatino,'Palatino Linotype',serif">Palatino</option>
+          <option value="Garamond,'EB Garamond',serif">Garamond</option>
+          <option value="Arial,Helvetica,sans-serif">Arial</option>
+          <option value="'Helvetica Neue',Helvetica,sans-serif">Helvetica Neue</option>
+          <option value="'Trebuchet MS',sans-serif">Trebuchet MS</option>
+          <option value="Verdana,Geneva,sans-serif">Verdana</option>
+          <option value="'Courier New',Courier,monospace">Courier New</option>
+        </select>
+      </div>
+      <div class="cg">
+        <span class="lbl">size</span>
+        <select class="si" id="pv-font-size" style="width:4.4rem;" onchange="pvApplySize()">
+          <option value="13px">13px</option>
+          <option value="14px">14px</option>
+          <option value="15px">15px</option>
+          <option value="16px" selected>16px</option>
+          <option value="17px">17px</option>
+          <option value="18px">18px</option>
+          <option value="20px">20px</option>
+          <option value="22px">22px</option>
+        </select>
+      </div>
+      <div class="cg">
+        <span class="lbl">weight</span>
+        <div class="tog" id="pv-weight-tog">
+          <button onclick="pvApplyWeight('300',this)">light</button>
+          <button onclick="pvApplyWeight('400',this)">reg</button>
+          <button onclick="pvApplyWeight('600',this)">semi</button>
+          <button onclick="pvApplyWeight('700',this)" class="on">bold</button>
+        </div>
+      </div>
+      <div class="cg">
+        <span class="lbl">line-h</span>
+        <select class="si" id="pv-line-height" style="width:4.2rem;" onchange="pvApplyLineHeight()">
+          <option value="1.4">1.4</option>
+          <option value="1.5">1.5</option>
+          <option value="1.6">1.6</option>
+          <option value="1.65" selected>1.65</option>
+          <option value="1.7">1.7</option>
+          <option value="1.8">1.8</option>
+          <option value="2.0">2.0</option>
+        </select>
+      </div>
+      <div class="cg">
+        <span class="lbl">colour</span>
+        <input type="color" id="pv-text-color" value="#1a1612" onchange="pvApplyColor()"
+          style="width:26px;height:22px;border:1px solid var(--rule);padding:1px;cursor:pointer;background:transparent;border-radius:2px;">
+      </div>
+      <div class="cg">
+        <span class="lbl">tracking</span>
+        <select class="si" id="pv-tracking" style="width:5.4rem;" onchange="pvApplyTracking()">
+          <option value="-0.05em">−0.05em</option>
+          <option value="-0.03em">−0.03em</option>
+          <option value="-0.01em">−0.01em</option>
+          <option value="0em" selected>0 (normal)</option>
+          <option value="0.02em">+0.02em</option>
+          <option value="0.05em">+0.05em</option>
+          <option value="0.08em">+0.08em</option>
+          <option value="0.1em">+0.10em</option>
+          <option value="0.15em">+0.15em</option>
+          <option value="0.2em">+0.20em</option>
+        </select>
+      </div>
+      <div class="vdiv"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.58rem;color:var(--mid);opacity:0.7">
+        select text in preview then apply
+      </span>
+    </div>
+    <div class="preview-scroll" id="preview-scroll">
+      <iframe id="preview-iframe" width="600" height="500" title="Email preview"></iframe>
+    </div>
+  </div>
+
+</div><!-- .workspace -->
+
+<!-- ── Status bar ───────────────────────────────────────────────────────────── -->
+<div class="statusbar" id="statusbar">
+  <span class="stat">Ready — paste HTML and press <b>▶ Process</b></span>
+</div>
+
+<script>
+'use strict';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+var opts       = { shy: true, widow: true, br: true, wrap: true };
+var pvFontOpts = { weight: '400' };
+var images     = [];
+var rawBodyHtml = '';
+var fullDocHtml = '';
+var previewWidth = 600;
+var activePreset = 'desktop';
+
+// ─── Device presets ───────────────────────────────────────────────────────────
+var PRESETS = {
+  desktop: {
+    colW:       600,
+    fontSize:   '16px',
+    fontWeight: '300',
+    lineHeight: '1.65',
+    fontFamily: "Georgia,'Times New Roman',serif",
+    tracking:   '0em',
+    label:      '600px · 16px Georgia · weight 300 · line-height 1.65'
+  },
+  tablet: {
+    colW:       480,
+    fontSize:   '16px',
+    fontWeight: '400',
+    lineHeight: '1.7',
+    fontFamily: "Georgia,'Times New Roman',serif",
+    tracking:   '0em',
+    label:      '480px · 16px Georgia · weight 400 · line-height 1.7'
+  },
+  mobile: {
+    colW:       360,
+    fontSize:   '15px',
+    fontWeight: '400',
+    lineHeight: '1.75',
+    fontFamily: "Georgia,'Times New Roman',serif",
+    tracking:   '0em',
+    label:      '360px · 15px Georgia · weight 400 · line-height 1.75'
+  }
+};
+
+function applyPreset(name, btn) {
+  var p = PRESETS[name];
+  if (!p) return;
+  activePreset = name;
+
+  // Update column width
+  setSelectValue('col-w', p.colW);
+
+  // Update preview typography controls
+  setSelectValue('pv-font-size',   p.fontSize);
+  setSelectValue('pv-line-height', p.lineHeight);
+  setSelectValue('pv-font-family', p.fontFamily);
+  setSelectValue('pv-tracking',    p.tracking || '0em');
+
+  // Weight toggle in preview bar
+  pvFontOpts.weight = p.fontWeight;
+  var weightMap = { '300':'light', '400':'reg', '600':'semi', '700':'bold' };
+  document.querySelectorAll('#pv-weight-tog button').forEach(function(b) {
+    b.classList.toggle('on', b.textContent.trim() === weightMap[p.fontWeight]);
+  });
+
+  // Update preview width to match preset column width
+  previewWidth = p.colW;
+  document.getElementById('preview-iframe').width = p.colW;
+
+  // Sync pw-tog: highlight closest match, or clear all if no exact match
+  var bestBtn = null, bestDiff = Infinity;
+  document.querySelectorAll('#pw-tog button').forEach(function(b) {
+    b.classList.remove('on');
+    var diff = Math.abs(parseInt(b.textContent) - p.colW);
+    if (diff < bestDiff) { bestDiff = diff; bestBtn = b; }
+  });
+  // Only highlight if within 20px of a standard size
+  if (bestDiff <= 20 && bestBtn) bestBtn.classList.add('on');
+
+  // Highlight active preset button
+  document.querySelectorAll('.preset-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+
+  // Update description
+  document.getElementById('preset-details').textContent = p.label;
+
+  // Auto re-process if there is already input content
+  var input = document.getElementById('input-area').value.trim();
+  if (input) { runProcess(); }
+}
+
+function setSelectValue(id, val) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  // <select>: find matching option
+  if (el.options) {
+    for (var i = 0; i < el.options.length; i++) {
+      if (el.options[i].value == val) { el.selectedIndex = i; return; }
+    }
+  }
+  // <input type="number"> or no matching option: set value directly
+  el.value = val;
+}
+
+// ─── Toggles ──────────────────────────────────────────────────────────────────
+function tog(key, val, btn) {
+  opts[key] = val;
+  var btns = btn.closest('.tog').querySelectorAll('button');
+  btns.forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+
+// Called from weight toggle buttons in the preview bar
+function pvApplyWeight(val, btn) {
+  pvFontOpts.weight = val;
+  var btns = btn.closest('.tog').querySelectorAll('button');
+  btns.forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  pvApplyToSelection('fontWeight', val);
+}
+
+function pvApplyFont() {
+  var val = document.getElementById('pv-font-family').value;
+  pvApplyToSelection('fontFamily', val);
+}
+
+function pvApplySize() {
+  var val = document.getElementById('pv-font-size').value;
+  pvApplyToSelection('fontSize', val);
+}
+
+function pvApplyLineHeight() {
+  var val = document.getElementById('pv-line-height').value;
+  pvApplyToSelection('lineHeight', val);
+}
+
+function pvApplyColor() {
+  var val = document.getElementById('pv-text-color').value;
+  pvApplyToSelection('color', val);
+}
+
+function pvApplyTracking() {
+  var val = document.getElementById('pv-tracking').value;
+  pvApplyToSelection('letterSpacing', val);
+}
+
+function pvApplyToSelection(cssProp, cssVal) {
+  var iframe = document.getElementById('preview-iframe');
+  var idoc   = iframe.contentDocument || iframe.contentWindow.document;
+  if (!idoc) return;
+
+  var sel = idoc.getSelection ? idoc.getSelection()
+          : (iframe.contentWindow ? iframe.contentWindow.getSelection() : null);
+
+  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+    // Wrap selected text in a styled span
+    var range = sel.getRangeAt(0);
+    var span  = idoc.createElement('span');
+    span.style[cssProp] = cssVal;
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      // Cross-element selection fallback
+      var frag = range.extractContents();
+      span.appendChild(frag);
+      range.insertNode(span);
+    }
+    sel.removeAllRanges();
+  } else {
+    // No selection - apply to the block element at cursor position
+    var focusNode = sel ? sel.focusNode : null;
+    var el = focusNode ? (focusNode.nodeType === 3 ? focusNode.parentNode : focusNode) : idoc.body;
+    var blockTags = ['P','H1','H2','H3','H4','H5','H6','TD','LI','DIV','BLOCKQUOTE'];
+    while (el && el !== idoc.body && blockTags.indexOf(el.tagName) === -1) {
+      el = el.parentNode;
+    }
+    if (el && el.style) el.style[cssProp] = cssVal;
+  }
+
+  syncFromPreview(idoc);
+}
+
+function syncFromPreview(idoc) {
+  if (!idoc || !idoc.body) return;
+  var bodyHtml = idoc.body.innerHTML;
+  bodyHtml = bodyHtml.replace(/ contenteditable="[^"]*"/gi, '');
+  bodyHtml = bodyHtml.replace(/ spellcheck="[^"]*"/gi, '');
+  rawBodyHtml = bodyHtml;
+  fullDocHtml = fullDocHtml.replace(
+    /(<body[^>]*>)([\s\S]*?)(<\/body>)/i,
+    function(m, open, _body, close) { return open + '\n\n' + bodyHtml + '\n\n' + close; }
+  );
+  renderCode(fullDocHtml);
+  setStatus([{t:'typography applied', c:'good'}]);
+}
+
+// ─── Tab switching (mobile) ───────────────────────────────────────────────────
+function switchTab(name, btn) {
+  ['input','code','preview'].forEach(function(n) {
+    document.getElementById('panel-'+n).classList.toggle('tab-active', n === name);
+  });
+  document.querySelectorAll('#tab-bar button').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+// ─── Preview width ────────────────────────────────────────────────────────────
+function setPW(w, btn) {
+  previewWidth = w;
+  document.getElementById('preview-iframe').width = w;
+  document.querySelectorAll('#pw-tog button').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  // Re-run process so table wrapper uses the new width
+  var input = document.getElementById('input-area').value.trim();
+  if (input) { runProcess(); } else if (fullDocHtml) { updatePreview(fullDocHtml); }
+}
+
+// ─── Image manager ────────────────────────────────────────────────────────────
+function handleImageUpload(e) {
+  Array.from(e.target.files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var b64  = ev.target.result;
+      var name = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      var colW = parseInt(document.getElementById('col-w').value,10)||600;
+      var tag  = '<img src="'+b64+'" alt="'+name.replace(/\.[^.]+$/,'')+'" width="'+colW
+               + '" style="display:block;max-width:100%;height:auto;">';
+      images.push({ name: name, b64: b64, tag: tag });
+      renderImageList();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function renderImageList() {
+  var list = document.getElementById('img-list');
+  list.innerHTML = '';
+  images.forEach(function(img, i) {
+    var d = document.createElement('div');
+    d.className = 'img-thumb';
+    d.innerHTML = '<img src="'+img.b64+'" alt="">'
+      + '<div class="img-thumb-name" title="'+img.name+'">'+img.name+'</div>'
+      + '<div class="img-thumb-btns">'
+      + '<button onclick="insertImage('+i+')">insert</button>'
+      + '<button class="del" onclick="deleteImage('+i+')">✕</button>'
+      + '</div>';
+    list.appendChild(d);
+  });
+}
+
+function insertImage(i) {
+  var ta  = document.getElementById('input-area');
+  var pos = ta.selectionStart;
+  var val = ta.value;
+  var snip = '\n' + images[i].tag + '\n';
+  ta.value = val.slice(0,pos) + snip + val.slice(pos);
+  ta.selectionStart = ta.selectionEnd = pos + snip.length;
+  ta.focus();
+}
+
+function deleteImage(i) { images.splice(i,1); renderImageList(); }
+
+// ─── Hyphenation ──────────────────────────────────────────────────────────────
+var SHY  = '\u00AD';
+var NBSP = '\u00A0';
+
+function hyphenateWord(word) {
+  var minLen = parseInt(document.getElementById('shy-min').value,10)||6;
+  if (word.length < minLen) return word;
+  var pre  = word.match(/^[^a-zA-Z]*/)[0];
+  var suf  = word.match(/[^a-zA-Z]*$/)[0];
+  var core = word.slice(pre.length, word.length - (suf.length||0));
+  if (core.length < minLen) return word;
+  var vowels = 'aeiouAEIOU';
+  var out = '';
+  for (var i = 0; i < core.length-1; i++) {
+    out += core[i];
+    if (vowels.indexOf(core[i])===-1 && vowels.indexOf(core[i+1])!==-1 && i>=2 && (core.length-i-1)>=3)
+      out += SHY;
+  }
+  return pre + out + core[core.length-1] + suf;
+}
+
+function hypTxt(t)  { return t.replace(/\b([a-zA-Z][a-zA-Z'-]*)\b/g, hyphenateWord); }
+function hypHtml(h) { return h.replace(/>([^<]+)</g, function(m,t){ return '>'+hypTxt(t)+'<'; }); }
+
+// ─── Widow control ────────────────────────────────────────────────────────────
+function glueWidows(text, n) {
+  var t = text.replace(/\s+$/,'');
+  var words = t.split(/\s+/);
+  if (words.length <= n) return text;
+  var sp = words.length - n;
+  return words.slice(0,sp).join(' ') + ' ' + words.slice(sp).join(NBSP);
+}
+function widowHtml(html, n) {
+  return html.replace(/>([^<]{8,})</g, function(m,inner){ return '>'+glueWidows(inner,n)+'<'; });
+}
+
+// ─── Mobile break spans ───────────────────────────────────────────────────────
+var MQ_CSS = [
+  '.rxc-br-m, .rxc-br-t { display:none !important; }',
+  '@media only screen and (max-width:480px) {',
+  '  .rxc-br-m { display:inline !important; }',
+  '}',
+  '@media only screen and (min-width:481px) and (max-width:640px) {',
+  '  .rxc-br-t { display:inline !important; }',
+  '}'
+].join('\n');
+
+function processWbr(html) {
+  html = html.replace(/<wbr\s+data-b="([^"]*)"[^>]*\/?>/gi, function(m, flags) {
+    var cls = flags.trim().split(/\s+/).map(function(f){
+      return f==='m'?'rxc-br-m': f==='t'?'rxc-br-t': null;
+    }).filter(Boolean);
+    return cls.length ? '<span class="'+cls.join(' ')+'" style="display:none"><br></span>' : '';
+  });
+  return html.replace(/<wbr\s*\/?>/gi, '<span class="rxc-br-m" style="display:none"><br></span>');
+}
+
+// ─── Table wrapper ────────────────────────────────────────────────────────────
+function wrapTable(inner, colW, bgColor, fontFamily, fontSize, fontWeight, lineHeight, textColor, letterSpacing) {
+  var tracking = (letterSpacing && letterSpacing !== '0em') ? ';letter-spacing:'+letterSpacing : '';
+  var tdStyle = 'padding:24px 28px;font-size:'+fontSize+';line-height:'+lineHeight
+    +';font-weight:'+fontWeight+';font-family:'+fontFamily+';color:'+textColor+tracking+';';
+  return [
+    '<!-- Email layout table — RagXControl -->',
+    '<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation"',
+    '       style="background-color:'+bgColor+';">',
+    '  <tr><td align="center" style="padding:0;">',
+    '    <table width="'+colW+'" cellpadding="0" cellspacing="0" border="0" role="presentation"',
+    '           style="width:'+colW+'px;max-width:100%;">',
+    '      <tr><td style="'+tdStyle+'">',
+    '',
+    inner.split('\n').map(function(l){ return '        '+l; }).join('\n'),
+    '',
+    '      </td></tr>',
+    '    </table>',
+    '  </td></tr>',
+    '</table>'
+  ].join('\n');
+}
+
+// ─── Full DOCTYPE ─────────────────────────────────────────────────────────────
+function buildFullDoc(body, bgColor, hasBreaks) {
+  var mq = hasBreaks
+    ? '\n  <style type="text/css">\n    '+MQ_CSS.replace(/\n/g,'\n    ')+'\n  </style>'
+    : '';
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="en" xmlns="http://www.w3.org/1999/xhtml"',
+    '      xmlns:o="urn:schemas-microsoft-com:office:office">',
+    '<head>',
+    '  <meta charset="UTF-8">',
+    '  <meta name="viewport" content="width=device-width,initial-scale=1.0">',
+    '  <meta http-equiv="X-UA-Compatible" content="IE=edge">',
+    '  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings>',
+    '    <o:PixelsPerInch>96</o:PixelsPerInch>',
+    '  </o:OfficeDocumentSettings></xml></noscript><![endif]-->',
+    '  <title>Email</title>'+mq,
+    '</head>',
+    '<body style="margin:0;padding:0;background-color:'+bgColor+';">',
+    '',
+    body,
+    '',
+    '</body></html>'
+  ].join('\n');
+}
+
+// ─── Block processing ─────────────────────────────────────────────────────────
+var BTAGS = ['p','td','div','h1','h2','h3','h4','h5','h6','li','blockquote','th'];
+var BRE   = new RegExp('<('+BTAGS.join('|')+'(?=[\\s>]))(\\s[^>]*)?>([\\s\\S]*?)<\\/('+BTAGS.join('|')+')>','gi');
+
+function processBlock(tag, attrs, inner) {
+  var n = +document.getElementById('widow-n').value||2;
+  var t = inner;
+  if (opts.shy)   t = t.indexOf('<')!==-1 ? hypHtml(t)       : hypTxt(t);
+  if (opts.widow) t = t.indexOf('<')!==-1 ? widowHtml(t,n)   : glueWidows(t,n);
+  return '<'+tag+(attrs||'>')+t+'</'+tag+'>';
+}
+
+// ─── Run ──────────────────────────────────────────────────────────────────────
+function runProcess() {
+  var input = document.getElementById('input-area').value.trim();
+  if (!input) { setStatus([{t:'No input — paste HTML first',c:'warn'}]); return; }
+
+  var colW       = parseInt(document.getElementById('col-w').value,10)||600;
+  var bgColor    = document.getElementById('bg-color').value    || '#ffffff';
+  var fontFamily = document.getElementById('pv-font-family').value || "Georgia,'Times New Roman',serif";
+  var fontSize   = document.getElementById('pv-font-size').value   || '16px';
+  var fontWeight = pvFontOpts.weight || '400';
+  var lineHeight = document.getElementById('pv-line-height').value || '1.65';
+  var textColor    = document.getElementById('pv-text-color').value  || '#1a1612';
+  var tracking     = document.getElementById('pv-tracking').value       || '0em';
+
+  var html = input, brCount = 0;
+
+  if (opts.br) {
+    html = processWbr(html);
+    brCount = (html.match(/rxc-br/g)||[]).length;
+  }
+
+  html = html.replace(BRE, function(m,tag,attrs,inner){ return processBlock(tag.toLowerCase(),attrs||'>',inner); });
+
+  if (input.indexOf('<') === -1) {
+    html = input.split(/\n\n+/).map(function(p){
+      return processBlock('p','>',p.replace(/\n/g,' ').trim());
+    }).join('\n');
+  }
+
+  var shyCount  = (html.match(/\u00AD/g)||[]).length;
+  var nbspCount = (html.match(/\u00A0/g)||[]).length;
+
+  var bodyHtml = opts.wrap
+    ? wrapTable(html, colW, bgColor, fontFamily, fontSize, fontWeight, lineHeight, textColor, tracking)
+    : html;
+
+  rawBodyHtml = bodyHtml;
+  fullDocHtml = buildFullDoc(bodyHtml, bgColor, opts.br && brCount > 0);
+
+  renderCode(fullDocHtml);
+  updatePreview(fullDocHtml);
+
+  var stats = [];
+  if (opts.shy)   stats.push({t:shyCount +' &shy;',  c:shyCount >0?'good':''});
+  if (opts.widow) stats.push({t:nbspCount+' &nbsp;', c:nbspCount>0?'good':''});
+  if (opts.br)    stats.push({t:brCount  +' br spans',c:brCount >0?'good':''});
+  if (opts.wrap)  stats.push({t:colW+'px '+activePreset,c:'good'});
+  stats.push({t:fullDocHtml.length+' chars'});
+  setStatus(stats);
+
+  document.getElementById('code-pill').textContent = 'done';
+  document.getElementById('code-pill').className   = 'pill ok';
+  document.getElementById('prev-pill').textContent = previewWidth+'px';
+  document.getElementById('prev-pill').className   = 'pill ok';
+}
+
+// ─── Code highlight ───────────────────────────────────────────────────────────
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderCode(html) {
+  var e = esc(html);
+  e = e.replace(/\u00AD/g,'<span class="shy-mark">&amp;shy;</span>');
+  e = e.replace(/\u00A0/g,'<span class="nbsp-mark">&amp;nbsp;</span>');
+  e = e.replace(/(&lt;span class=&quot;rxc-br[^"]*&quot;[^&]*&gt;&lt;br&gt;&lt;\/span&gt;)/g,'<span class="br-mark">$1</span>');
+  e = e.replace(/(&lt;table\b[^&]*role=&quot;presentation&quot;[^&]*&gt;)/g,'<span class="wrap-mark">$1</span>');
+  e = e.replace(/=&quot;([^&]*)&quot;/g,'=<span class="attr-mark">&quot;$1&quot;</span>');
+  e = e.replace(/(&lt;\/?[a-zA-Z][a-zA-Z0-9]*(?:\s[^&gt;]*)?\/?&gt;)/g,'<span class="tag-mark">$1</span>');
+  document.getElementById('code-area').innerHTML = e;
+}
+
+// ─── Preview ──────────────────────────────────────────────────────────────────
+// document.write() into a blank iframe is the only approach that works
+// on file://, http://, and https:// without any cross-origin issues.
+// The iframe has no src attribute — it stays about:blank, same origin.
+
+function updatePreview(fullHtml) {
+  var iframe = document.getElementById('preview-iframe');
+
+  // Make body contenteditable so the typography toolbar can style selections
+  var editableHtml = fullHtml.replace(
+    '<body style=',
+    '<body contenteditable="true" spellcheck="false" style='
+  );
+
+  // Write directly into the iframe document — always same-origin on about:blank
+  var iwin = iframe.contentWindow;
+  var idoc = iframe.contentDocument || iwin.document;
+  idoc.open('text/html', 'replace');
+  idoc.write(editableHtml);
+  idoc.close();
+
+  // Auto-size height to content after a short paint delay
+  setTimeout(function() {
+    try {
+      var h = idoc.body ? idoc.body.scrollHeight : 400;
+      iframe.height = Math.max(h + 40, 200);
+    } catch(e) {}
+  }, 150);
+}
+
+// ─── Copy ─────────────────────────────────────────────────────────────────────
+function copyText(text, btnId, label) {
+  navigator.clipboard.writeText(text).then(function(){
+    var btn = document.getElementById(btnId);
+    var orig = btn.textContent;
+    btn.textContent = label; btn.classList.add('ok');
+    setTimeout(function(){ btn.textContent = orig; btn.classList.remove('ok'); }, 1800);
+  });
+}
+function copyCode()    { if (rawBodyHtml) copyText(rawBodyHtml,'copy-html-btn','copied!'); }
+function copyFull()    { if (fullDocHtml) copyText(fullDocHtml,'copy-full-btn','copied!'); }
+function copyPreview() {
+  if (!fullDocHtml) { setStatus([{t:'Process first',c:'warn'}]); return; }
+
+  var btn = document.getElementById('copy-prev-btn');
+
+  // ── Build the rich HTML for pasting into an email client ─────────────────
+  // We read the live iframe DOM so any typography edits made in the preview
+  // are included, then wrap it in the full email table structure.
+  var iframe = document.getElementById('preview-iframe');
+  var idoc   = iframe.contentDocument || iframe.contentWindow.document;
+
+  var bodyContent = '';
+  if (idoc && idoc.body) {
+    // Clone body so we can clean it without affecting the live preview
+    var clone = idoc.body.cloneNode(true);
+    // Strip the contenteditable/spellcheck attributes we injected for editing
+    clone.removeAttribute('contenteditable');
+    clone.removeAttribute('spellcheck');
+    // Also strip from any child elements that may have picked them up
+    clone.querySelectorAll('[contenteditable]').forEach(function(el) {
+      el.removeAttribute('contenteditable');
+    });
+    bodyContent = clone.innerHTML;
+  } else {
+    // Fallback: use the stored processed HTML body
+    bodyContent = rawBodyHtml;
+  }
+
+  // Wrap in a minimal HTML document shell — email clients need this context
+  // to correctly interpret the inline styles on paste
+  var bgColor   = document.getElementById('bg-color').value || '#ffffff';
+  var pasteHtml = [
+    '<!DOCTYPE html>',
+    '<html>',
+    '<head><meta charset="UTF-8"></head>',
+    '<body style="margin:0;padding:0;background-color:' + bgColor + ';">',
+    bodyContent,
+    '</body></html>'
+  ].join('');
+
+  // ── Try ClipboardItem (text/html) — gives rich paste into email clients ───
+  if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+    var blob = new Blob([pasteHtml], { type: 'text/html' });
+    navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })])
+      .then(function() {
+        var orig = btn.textContent;
+        btn.textContent = 'ready to paste!';
+        btn.classList.add('ok');
+        setTimeout(function() { btn.textContent = orig; btn.classList.remove('ok'); }, 2200);
+        setStatus([{t:'Rich HTML copied — paste directly into Gmail, Apple Mail, or Outlook', c:'good'}]);
+      })
+      .catch(function() {
+        // ClipboardItem write was blocked (e.g. Firefox) — fall back to text
+        copyText(pasteHtml, 'copy-prev-btn', 'copied (fallback)');
+        setStatus([{t:'Copied as HTML text — your browser blocked rich copy', c:'warn'}]);
+      });
+  } else {
+    // Older browser fallback
+    copyText(pasteHtml, 'copy-prev-btn', 'copied!');
+    setStatus([{t:'Copied as HTML — paste into your email client', c:'good'}]);
+  }
+}
+
+// ─── Status ───────────────────────────────────────────────────────────────────
+function setStatus(stats) {
+  document.getElementById('statusbar').innerHTML = stats.map(function(s){
+    return '<span class="stat '+(s.c||'')+'"><b>'+s.t+'</b></span>';
+  }).join('');
+}
+
+// ─── Misc ─────────────────────────────────────────────────────────────────────
+function clearInput() { document.getElementById('input-area').value = ''; }
+
+function loadExample() {
+  document.getElementById('input-area').value = [
+    '<h2 style="font-family:Georgia,serif;font-size:22px;margin:0 0 14px;color:#1a1612;">The Typographer\'s Challenge</h2>',
+    '',
+    '<p style="margin:0 0 12px;">Typography is the art of arranging type to make written language',
+    'legible, readable, and visually appealing when displayed across<wbr data-b="m">',
+    'extraordinarily diverse devices and environments.</p>',
+    '',
+    '<p style="margin:0 0 12px;">A good rag avoids leaving articles like &#8220;a&#8221;, &#8220;an&#8221;,',
+    'or &#8220;the&#8221; stranded alone at the end of a line.<wbr data-b="m t">',
+    'Antidisestablishmentarianism benefits greatly from soft hyphenation.</p>',
+    '',
+    '<p style="margin:0 0 12px;">The finest typographic details are often invisible to the casual',
+    'reader &#8212; but their absence is immediately felt. Widows, orphans,',
+    'and rivers of whitespace all erode the reading experience.</p>',
+    '',
+    '<p style="margin:0;">RagXControl gives you the tools to address every one of these',
+    'issues with a single preprocessing step before you send.</p>'
+  ].join('\n');
+}
+
+// ─── Dark mode ───────────────────────────────────────────────────────────────
+function toggleDark(btn) {
+  var isDark = document.body.classList.toggle('dark');
+  btn.textContent = isDark ? '◐ light' : '◑ dark';
+  btn.classList.toggle('active', isDark);
+  // Persist preference
+  try { localStorage.setItem('rxc-dark', isDark ? '1' : '0'); } catch(e) {}
+}
+
+// Restore saved preference on load
+(function() {
+  try {
+    if (localStorage.getItem('rxc-dark') === '1') {
+      document.body.classList.add('dark');
+      var btn = document.getElementById('dark-btn');
+      if (btn) { btn.textContent = '◐ light'; btn.classList.add('active'); }
+    }
+  } catch(e) {}
+})();
+
+document.addEventListener('keydown', function(e){
+  if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); runProcess(); }
+});
+
+// Init preset details label
+document.getElementById('preset-details').textContent = PRESETS.desktop.label;
+</script>
+</body>
+</html>
